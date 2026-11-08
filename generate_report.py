@@ -1206,13 +1206,6 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
     </div>
 
     <div class="cover-meta">
-      <div class="meta-info-grid">
-        <div><strong>Học phần:</strong> Nhập môn Cơ sở dữ liệu</div>
-        <div><strong>Hệ Quản trị CSDL:</strong> MySQL (InnoDB, UTF8MB4)</div>
-        <div><strong>Đơn vị đào tạo:</strong> Khoa KHDL &amp; TTNT (FDA - NEU)</div>
-        <div><strong>Ngày hoàn thành:</strong> Tháng 11 / 2026</div>
-      </div>
-
       <div class="meta-member-title">DANH SÁCH THÀNH VIÊN NHÓM THỰC HIỆN</div>
       <table class="member-table">
         <thead>
