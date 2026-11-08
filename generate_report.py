@@ -882,6 +882,23 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
   .member-table tr:nth-child(even) td {{
     background: #f1f5f9;
   }}
+  .github-repo-box {{
+    margin-top: 12px;
+    padding: 8px 14px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 9.5pt;
+    color: #1e293b;
+  }}
+  .github-repo-box a {{
+    color: #1d4ed8;
+    font-weight: 700;
+    text-decoration: none;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size: 9.2pt;
+  }}
   .cover-footer {{
     text-align: center;
     font-size: 10pt;
@@ -1208,6 +1225,10 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
           </tr>
         </tbody>
       </table>
+      <div class="github-repo-box">
+        <strong>GitHub Repository:</strong>
+        <a href="https://github.com/pdanh4992/mysql-tutoring-center-management">https://github.com/pdanh4992/mysql-tutoring-center-management</a>
+      </div>
     </div>
 
     <div class="cover-footer">
