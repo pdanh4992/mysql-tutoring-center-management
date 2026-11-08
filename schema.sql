@@ -5,13 +5,13 @@ CREATE DATABASE tutoring_mini
 
 USE tutoring_mini;
 
--- 1. Bảng subjects: Danh mục môn học
+-- 1. Table subjects: Catalog of academic subjects
 CREATE TABLE subjects (
     subject_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE
 ) ENGINE=InnoDB;
 
--- 2. Bảng tutors: Danh sách gia sư
+-- 2. Table tutors: Tutor profiles and subject assignments
 CREATE TABLE tutors (
     tutor_id INT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE tutors (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
--- 3. Bảng students: Danh sách học viên
+-- 3. Table students: Student profiles and contact details
 CREATE TABLE students (
     student_id INT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE students (
     phone VARCHAR(20) NOT NULL
 ) ENGINE=InnoDB;
 
--- 4. Bảng lessons: Lịch sử và trạng thái các buổi học
+-- 4. Table lessons: Lesson schedule and lifecycle status
 CREATE TABLE lessons (
     lesson_id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE lessons (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
--- 5. Bảng lesson_reports: Báo cáo kết quả và học phí buổi học (Quan hệ 1-1 với lessons)
+-- 5. Table lesson_reports: Post-lesson evaluation and confirmed fee (Strict 1-1 relation with lessons)
 CREATE TABLE lesson_reports (
     report_id INT AUTO_INCREMENT PRIMARY KEY,
     lesson_id INT NOT NULL UNIQUE,
@@ -65,7 +65,7 @@ CREATE TABLE lesson_reports (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
--- 6. Bảng payments: Giao dịch thanh toán học phí (Quan hệ 1-N với lessons)
+-- 6. Table payments: Tuition payment transactions (1-N relation with lessons)
 CREATE TABLE payments (
     payment_id INT AUTO_INCREMENT PRIMARY KEY,
     lesson_id INT NOT NULL,

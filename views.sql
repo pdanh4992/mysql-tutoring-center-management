@@ -1,9 +1,9 @@
 USE tutoring_mini;
 
 -- 1. VIEW v_detail:
--- Mỗi dòng là một buổi học, gồm mã buổi học, ngày, trạng thái, mã + tên học viên,
--- mã + tên gia sư, mã + tên môn học và học phí.
--- Giữ cả giao dịch chưa có kết quả (fee là NULL).
+-- Each row represents a lesson, including lesson ID, date, status, student ID + name,
+-- tutor ID + name, subject ID + name, and tuition fee.
+-- Retains lessons without a report (fee is NULL).
 CREATE OR REPLACE VIEW v_detail AS
 SELECT
     l.lesson_id,
@@ -23,9 +23,9 @@ JOIN subjects sub ON t.subject_id = sub.subject_id
 LEFT JOIN lesson_reports lr ON l.lesson_id = lr.lesson_id;
 
 -- 2. VIEW v_group_summary:
--- Mỗi dòng là một môn học, gồm mã, tên, tổng giao dịch, số Completed,
--- số Cancelled và tổng học phí (bằng 0 nếu chưa phát sinh);
--- giữ cả nhóm chưa phát sinh giao dịch.
+-- Each row represents a subject, including ID, name, total lessons, Completed count,
+-- Cancelled count, and total tuition fee (0 if none);
+-- retains subjects with no lessons.
 CREATE OR REPLACE VIEW v_group_summary AS
 SELECT
     sub.subject_id,
@@ -41,11 +41,11 @@ LEFT JOIN lesson_reports lr ON l.lesson_id = lr.lesson_id
 GROUP BY sub.subject_id, sub.name;
 
 -- 3. VIEW v_debt:
--- Mỗi dòng là một học viên, gồm mã, tên, tổng học phí đã xác nhận, tổng đã trả
--- và còn nợ (công nợ = tổng chi phí đã xác nhận - tổng tiền thực thu).
--- Chống cộng lặp chi phí: Gom nhóm bảng payments theo lesson_id trong subquery
--- pay_per_lesson trước khi LEFT JOIN với lessons và lesson_reports.
--- Giữ cả người chưa phát sinh chi phí hoặc thanh toán (hiển thị 0).
+-- Each row represents a student, including ID, name, total confirmed tuition fee,
+-- total paid, and remaining debt (debt = confirmed fee - total paid).
+-- Anti-Fanout / Chasm Trap Prevention: Pre-aggregates payments by lesson_id in
+-- subquery pay_per_lesson before joining with lessons and lesson_reports.
+-- Retains students with 0 fees or 0 payments (displayed as 0).
 CREATE OR REPLACE VIEW v_debt AS
 SELECT
     s.student_id,
@@ -68,7 +68,7 @@ LEFT JOIN (
     ON l.lesson_id = pay_per_lesson.lesson_id
 GROUP BY s.student_id, s.full_name;
 
--- Truy vấn kiểm tra kết quả của 3 VIEW
+-- Verification queries for the 3 VIEWs
 SELECT * FROM v_detail ORDER BY lesson_id ASC;
 SELECT * FROM v_group_summary ORDER BY subject_id ASC;
 SELECT * FROM v_debt ORDER BY remaining_debt DESC, student_id ASC;

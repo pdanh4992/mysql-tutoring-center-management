@@ -1,7 +1,7 @@
 USE tutoring_mini;
 
--- 1. Liệt kê các buổi học Completed trong tháng 01/2025, kèm mã + tên
--- học viên, mã + tên gia sư và lesson_date.
+-- 1. List all Completed lessons in January 2025, including student ID + name,
+-- tutor ID + name, and lesson_date.
 SELECT
     l.lesson_id,
     s.student_id,
@@ -18,8 +18,8 @@ WHERE l.status = 'Completed'
   AND l.lesson_date < '2025-02-01'
 ORDER BY l.lesson_date ASC, l.lesson_id ASC;
 
--- 2. Đếm tổng số buổi học theo từng môn học trong Quý I/2025 (01/01/2025
--- đến hết 31/03/2025), tính mọi trạng thái; hiển thị cả nhóm có số lượng bằng 0.
+-- 2. Count total lessons per subject in Q1/2025 (from 2025-01-01 through
+-- 2025-03-31) across all statuses; include subjects with 0 lessons.
 SELECT
     sub.subject_id,
     sub.name AS subject_name,
@@ -32,8 +32,8 @@ LEFT JOIN lessons l ON t.tutor_id = l.tutor_id
 GROUP BY sub.subject_id, sub.name
 ORDER BY total_lessons_q1_2025 DESC, sub.subject_id ASC;
 
--- 3. Liệt kê các học viên có ít nhất một buổi học chưa có báo cáo buổi học,
--- loại trừ Cancelled. Mỗi người chỉ xuất hiện một lần.
+-- 3. List distinct students who have at least one lesson without a lesson report,
+-- excluding Cancelled lessons. Each student appears only once.
 SELECT DISTINCT
     s.student_id,
     s.full_name AS student_name
@@ -44,8 +44,8 @@ WHERE l.status <> 'Cancelled'
   AND lr.report_id IS NULL
 ORDER BY s.student_id ASC;
 
--- 4. Tính học phí trung bình trên một giao dịch Completed của từng môn học,
--- xét toàn bộ thời gian; chỉ lấy nhóm đã phát sinh chi phí.
+-- 4. Calculate the average tuition fee per Completed lesson for each subject
+-- across all time; include only subjects that have incurred fees.
 SELECT
     sub.subject_id,
     sub.name AS subject_name,
@@ -59,8 +59,8 @@ WHERE l.status = 'Completed'
 GROUP BY sub.subject_id, sub.name
 ORDER BY avg_completed_fee DESC, sub.subject_id ASC;
 
--- 5. Liệt kê 3 gia sư có nhiều buổi học Completed nhất trong năm 2025.
--- Nếu bằng nhau, ưu tiên tutor_id tăng dần; chỉ lấy đối tượng có giao dịch.
+-- 5. List the top 3 tutors with the most Completed lessons in 2025.
+-- Break ties by tutor_id ascending; include only tutors with Completed lessons.
 SELECT
     t.tutor_id,
     t.full_name AS tutor_name,
@@ -74,8 +74,8 @@ GROUP BY t.tutor_id, t.full_name
 ORDER BY completed_lessons_2025 DESC, t.tutor_id ASC
 LIMIT 3;
 
--- 6. Tính tổng số tiền từng học viên đã thanh toán trong năm 2025 theo
--- payment_date; hiển thị cả người chưa trả tiền với tổng bằng 0.
+-- 6. Calculate the total amount paid by each student in 2025 based on
+-- payment_date; display 0 for students with no payments in 2025.
 SELECT
     s.student_id,
     s.full_name AS student_name,
@@ -88,8 +88,8 @@ LEFT JOIN payments p ON l.lesson_id = p.lesson_id
 GROUP BY s.student_id, s.full_name
 ORDER BY total_paid_2025 DESC, s.student_id ASC;
 
--- 7. Liệt kê các học viên chưa có bất kỳ bản ghi thanh toán nào trong
--- toàn bộ dữ liệu, kể cả người chưa có giao dịch.
+-- 7. List all students who have no payment records across the entire database,
+-- including students who have never had any lessons.
 SELECT
     s.student_id,
     s.full_name AS student_name,
@@ -102,8 +102,8 @@ GROUP BY s.student_id, s.full_name, s.dob, s.phone
 HAVING COUNT(p.payment_id) = 0
 ORDER BY s.student_id ASC;
 
--- 8. Liệt kê toàn bộ học viên theo tổng học phí đã xác nhận giảm dần,
--- không phụ thuộc đã thanh toán hay chưa; nếu bằng nhau, sắp theo mã tăng dần.
+-- 8. Rank all students by total confirmed tuition fee in descending order,
+-- regardless of payment status; break ties by student_id ascending.
 SELECT
     s.student_id,
     s.full_name AS student_name,
@@ -115,9 +115,9 @@ LEFT JOIN lesson_reports lr ON l.lesson_id = lr.lesson_id
 GROUP BY s.student_id, s.full_name
 ORDER BY total_confirmed_fee DESC, s.student_id ASC;
 
--- 9. Tính tỷ lệ hủy của từng gia sư trong năm 2025:
--- (số buổi học Cancelled / tổng số buổi học của năm) * 100.
--- Làm tròn 2 chữ số thập phân; trả NULL nếu tổng bằng 0.
+-- 9. Calculate the cancellation rate for each tutor in 2025:
+-- (Cancelled lessons / total lessons in 2025) * 100.
+-- Round to 2 decimal places; return NULL if total lessons in 2025 is 0.
 SELECT
     t.tutor_id,
     t.full_name AS tutor_name,
@@ -135,8 +135,8 @@ LEFT JOIN lessons l ON t.tutor_id = l.tutor_id
 GROUP BY t.tutor_id, t.full_name
 ORDER BY t.tutor_id ASC;
 
--- 10. Liệt kê các học viên có hơn 3 buổi học Completed trong năm 2025,
--- kèm số lần; sắp số lần giảm dần.
+-- 10. List students who have more than 3 Completed lessons in 2025,
+-- including the count; order by count descending.
 SELECT
     s.student_id,
     s.full_name AS student_name,

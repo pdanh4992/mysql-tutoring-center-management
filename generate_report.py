@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Script tự động kiểm thử 4 tệp SQL trên MySQL Server thực tế và kết xuất
-Báo cáo học thuật chuyên nghiệp: Bao_cao_De_01.pdf
-Đề 01: Quản lý trung tâm gia sư (tutoring_mini)
+Automated MySQL verification and PDF report generator for:
+Topic 01: Tutoring Center Management System (tutoring_mini)
+Output: Bao_cao_De_01.pdf
 """
 
 import base64
@@ -32,7 +32,7 @@ def img_to_data_uri(path: Path) -> str:
 
 
 def ensure_mysql_running() -> bool:
-    """Khởi động instance MySQL cục bộ phục vụ kiểm thử và trích xuất kết quả."""
+    """Start a temporary local MySQL instance for verification and live result extraction."""
     if MYSQL_SOCK.exists():
         res = subprocess.run(
             [MYSQL_BIN, "-u", "root", f"--socket={MYSQL_SOCK}", "-e", "SELECT 1;"],
@@ -81,7 +81,7 @@ def ensure_mysql_running() -> bool:
         )
         if res.returncode == 0:
             return True
-    raise RuntimeError("Không thể khởi động MySQL Server để trích xuất dữ liệu.")
+    raise RuntimeError("Failed to start local MySQL Server instance.")
 
 
 def stop_mysql():
@@ -108,11 +108,11 @@ def run_sql_file(filename: str):
             text=True,
         )
     if res.returncode != 0:
-        raise RuntimeError(f"Lỗi khi chạy {filename}:\n{res.stderr}")
+        raise RuntimeError(f"Error executing {filename}:\n{res.stderr}")
 
 
 def run_query(sql: str):
-    """Chạy câu lệnh SELECT trên MySQL và trả về (headers, rows)."""
+    """Execute a SELECT query on MySQL and return (headers, rows)."""
     res = subprocess.run(
         [
             MYSQL_BIN,
@@ -130,7 +130,7 @@ def run_query(sql: str):
         text=True,
     )
     if res.returncode != 0:
-        raise RuntimeError(f"Lỗi truy vấn SQL:\n{res.stderr}\nSQL:\n{sql}")
+        raise RuntimeError(f"SQL Query Error:\n{res.stderr}\nSQL:\n{sql}")
     lines = [line for line in res.stdout.splitlines() if line.strip() != ""]
     if not lines:
         return [], []
@@ -142,8 +142,8 @@ def run_query(sql: str):
 def render_table(headers, rows, caption=None, compact=False):
     if not headers:
         empty_html = (
-            '<div class="empty-result">✓ Kết quả truy vấn: <strong>0 dòng (Tập rỗng)</strong> '
-            "— Không có bản ghi nào vi phạm ràng buộc!</div>"
+            '<div class="empty-result">✓ Query Result: <strong>0 rows (Empty set)</strong> '
+            "— No constraint violations detected!</div>"
         )
         if caption:
             return f'<div class="table-wrap">{empty_html}<div class="table-caption">{caption}</div></div>'
@@ -161,12 +161,12 @@ def render_table(headers, rows, caption=None, compact=False):
                 "." in cell or len(cell) <= 4
             ):
                 tds.append(f'<td class="num-cell">{html.escape(cell)}</td>')
-            elif cell in ("Completed", "Pending", "Cancelled", "HOP_LE"):
+            elif cell in ("Completed", "Pending", "Cancelled", "VALID"):
                 badge_cls = {
                     "Completed": "badge-completed",
                     "Pending": "badge-pending",
                     "Cancelled": "badge-cancelled",
-                    "HOP_LE": "badge-completed",
+                    "VALID": "badge-completed",
                 }[cell]
                 tds.append(
                     f'<td class="center-cell"><span class="status-badge {badge_cls}">{html.escape(cell)}</span></td>'
@@ -188,7 +188,7 @@ def render_table(headers, rows, caption=None, compact=False):
 
 
 def build_erd_svg() -> str:
-    """Dựng sơ đồ quan hệ thực thể (ERD) dạng Vector SVG cân đối, rõ nét, không tràn chữ."""
+    """Build a clean, well-proportioned SVG Entity-Relationship Diagram (ERD) in English."""
     return """
     <div class="erd-container">
       <svg viewBox="0 0 960 430" xmlns="http://www.w3.org/2000/svg" class="erd-svg">
@@ -274,7 +274,7 @@ def build_erd_svg() -> str:
         <g filter="url(#shadow)">
           <rect x="330" y="225" width="270" height="150" rx="6" fill="#ffffff" stroke="#1e40af" stroke-width="2"/>
           <rect x="330" y="225" width="270" height="28" rx="6" fill="#1e40af"/>
-          <text x="465" y="244" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="12.5">4. lessons (Bảng Trung tâm)</text>
+          <text x="465" y="244" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="12.5">4. lessons (Core Table)</text>
           <text x="342" y="272" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#b91c1c">PK</tspan>  lesson_id : INT</text>
           <text x="342" y="293" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#7c3aed">FK</tspan>  student_id : INT NOT NULL</text>
           <text x="342" y="314" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#7c3aed">FK</tspan>  tutor_id : INT NOT NULL</text>
@@ -286,7 +286,7 @@ def build_erd_svg() -> str:
         <g filter="url(#shadow)">
           <rect x="695" y="25" width="245" height="165" rx="6" fill="#ffffff" stroke="#047857" stroke-width="1.8"/>
           <rect x="695" y="25" width="245" height="28" rx="6" fill="#047857"/>
-          <text x="817" y="44" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="12.5">5. lesson_reports (Quan hệ 1-1)</text>
+          <text x="817" y="44" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="12.5">5. lesson_reports (1-1 Relation)</text>
           <text x="706" y="70" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#b91c1c">PK</tspan>  report_id : INT</text>
           <text x="706" y="91" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#047857">FK,UQ</tspan> lesson_id : INT NOT NULL UNIQUE</text>
           <text x="706" y="112" font-size="11" fill="#0f172a">     content : TEXT NOT NULL</text>
@@ -299,7 +299,7 @@ def build_erd_svg() -> str:
         <g filter="url(#shadow)">
           <rect x="695" y="225" width="245" height="150" rx="6" fill="#ffffff" stroke="#b45309" stroke-width="1.8"/>
           <rect x="695" y="225" width="245" height="28" rx="6" fill="#b45309"/>
-          <text x="817" y="244" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="12.5">6. payments (Quan hệ 1-N)</text>
+          <text x="817" y="244" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="12.5">6. payments (1-N Relation)</text>
           <text x="706" y="272" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#b91c1c">PK</tspan>  payment_id : INT</text>
           <text x="706" y="293" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#7c3aed">FK</tspan>  lesson_id : INT NOT NULL</text>
           <text x="706" y="314" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#b45309">CK</tspan>  amount : DECIMAL(12,2) (&gt; 0)</text>
@@ -310,10 +310,10 @@ def build_erd_svg() -> str:
         <!-- Legend at bottom -->
         <rect x="20" y="392" width="920" height="24" rx="4" fill="#e2e8f0"/>
         <text x="480" y="408" text-anchor="middle" font-size="10.8" fill="#1e293b" font-weight="600">
-          Chú giải: [PK] Khóa chính (Primary Key)   |   [FK] Khóa ngoại (Foreign Key)   |   [UQ] Duy nhất (UNIQUE)   |   [CK] Ràng buộc miền giá trị (CHECK Constraint)
+          Legend: [PK] Primary Key   |   [FK] Foreign Key   |   [UQ] Unique Constraint (UNIQUE)   |   [CK] Check Constraint (CHECK)
         </text>
       </svg>
-      <div class="table-caption">Hình 2.1: Sơ đồ Quan hệ Thực thể (ERD) của Cơ sở dữ liệu Quản lý Trung tâm Gia sư (<code>tutoring_mini</code>).</div>
+      <div class="table-caption">Figure 2.1: Entity-Relationship Diagram (ERD) of the Tutoring Center Management Database (<code>tutoring_mini</code>).</div>
     </div>
     """
 
@@ -321,50 +321,50 @@ def build_erd_svg() -> str:
 def generate_html_report():
     started_by_us = ensure_mysql_running()
     try:
-        # Chạy tuần tự 4 tệp SQL
+        # Execute the 4 SQL files sequentially
         run_sql_file("schema.sql")
         run_sql_file("seed.sql")
         run_sql_file("queries.sql")
         run_sql_file("views.sql")
 
-        # Đọc nội dung 4 file SQL
+        # Read schema.sql source code
         schema_code = (BASE_DIR / "schema.sql").read_text(encoding="utf-8")
 
-        # Trích xuất các bảng dữ liệu đã nạp trong seed.sql
+        # Extract seeded data tables
         tbl_subjects = render_table(
             *run_query("SELECT * FROM subjects ORDER BY subject_id;"),
-            caption="Bảng 3.1: Dữ liệu bảng danh mục môn học (subjects — 6 bản ghi).",
+            caption="Table 3.1: Seeded data in the subjects table (6 records).",
             compact=True,
         )
         tbl_tutors = render_table(
             *run_query("SELECT * FROM tutors ORDER BY tutor_id;"),
-            caption="Bảng 3.2: Dữ liệu bảng danh sách gia sư (tutors — 6 bản ghi).",
+            caption="Table 3.2: Seeded data in the tutors table (6 records).",
             compact=True,
         )
         tbl_students = render_table(
             *run_query("SELECT * FROM students ORDER BY student_id;"),
-            caption="Bảng 3.3: Dữ liệu bảng danh sách học viên (students — 11 bản ghi).",
+            caption="Table 3.3: Seeded data in the students table (11 records).",
             compact=True,
         )
         tbl_lessons = render_table(
             *run_query("SELECT * FROM lessons ORDER BY lesson_id;"),
-            caption="Bảng 3.4: Dữ liệu bảng lịch sử buổi học (lessons — 23 bản ghi).",
+            caption="Table 3.4: Seeded data in the lessons table (23 records).",
             compact=True,
         )
         tbl_reports = render_table(
             *run_query(
                 "SELECT report_id, lesson_id, content, feedback, duration_minutes, fee FROM lesson_reports ORDER BY report_id;"
             ),
-            caption="Bảng 3.5: Dữ liệu bảng báo cáo kết quả buổi học (lesson_reports — 16 bản ghi, tỷ lệ 1-1 với buổi Completed).",
+            caption="Table 3.5: Seeded data in the lesson_reports table (16 records, strict 1-1 relation with Completed lessons).",
             compact=True,
         )
         tbl_payments = render_table(
             *run_query("SELECT * FROM payments ORDER BY payment_id;"),
-            caption="Bảng 3.6: Dữ liệu bảng giao dịch thanh toán (payments — 17 bản ghi).",
+            caption="Table 3.6: Seeded data in the payments table (17 records).",
             compact=True,
         )
 
-        # Kết quả kiểm chứng trong seed.sql
+        # Verification results from seed.sql
         ver_1a = render_table(
             *run_query(
                 """
@@ -373,7 +373,7 @@ def generate_html_report():
                 GROUP BY l.status;
                 """
             ),
-            caption="Bảng 3.7: Kết quả Kiểm chứng 1A — Đối chiếu trạng thái buổi học và số lượng báo cáo.",
+            caption="Table 3.7: Verification 1A Result — Lesson counts by status vs. corresponding lesson report counts.",
         )
         ver_1b = render_table(
             *run_query(
@@ -384,7 +384,7 @@ def generate_html_report():
                    OR (l.status <> 'Completed' AND lr.report_id IS NOT NULL);
                 """
             ),
-            caption="Bảng 3.8: Kết quả Kiểm chứng 1B — Kiểm tra buổi học vi phạm quy tắc báo cáo 1-1.",
+            caption="Table 3.8: Verification 1B Result — Checking for any lessons violating the 1-1 report rule.",
         )
         ver_2a = render_table(
             *run_query(
@@ -392,7 +392,7 @@ def generate_html_report():
                 SELECT lr.lesson_id, l.status, lr.fee AS confirmed_fee,
                        COALESCE(SUM(p.amount), 0) AS total_paid,
                        lr.fee - COALESCE(SUM(p.amount), 0) AS remaining_debt,
-                       CASE WHEN COALESCE(SUM(p.amount), 0) <= lr.fee THEN 'HOP_LE' ELSE 'VI_PHAM' END AS validation_status
+                       CASE WHEN COALESCE(SUM(p.amount), 0) <= lr.fee THEN 'VALID' ELSE 'VIOLATION' END AS validation_status
                 FROM lesson_reports lr
                 JOIN lessons l ON lr.lesson_id = l.lesson_id
                 LEFT JOIN payments p ON lr.lesson_id = p.lesson_id
@@ -400,7 +400,7 @@ def generate_html_report():
                 ORDER BY lr.lesson_id;
                 """
             ),
-            caption="Bảng 3.9: Kết quả Kiểm chứng 2A — Đối chiếu học phí xác nhận và tổng tiền thực thu theo từng buổi học.",
+            caption="Table 3.9: Verification 2A Result — Reconciling confirmed tuition fees and total payments per lesson.",
             compact=True,
         )
         ver_2b = render_table(
@@ -412,21 +412,21 @@ def generate_html_report():
                 HAVING lr.fee IS NULL OR SUM(p.amount) > lr.fee;
                 """
             ),
-            caption="Bảng 3.10: Kết quả Kiểm chứng 2B — Kiểm tra giao dịch thu tiền vượt học phí hoặc chưa có báo cáo.",
+            caption="Table 3.10: Verification 2B Result — Checking for payments exceeding the confirmed fee or lacking a lesson report.",
         )
 
-        # 10 Truy vấn trong queries.sql
+        # 10 Analytical Queries in queries.sql
         q_specs = [
             {
                 "num": 1,
-                "title": "Liệt kê các buổi học Completed trong tháng 01/2025",
-                "req": "Liệt kê các buổi học <code>Completed</code> trong tháng 01/2025, kèm mã + tên học viên, mã + tên gia sư và <code>lesson_date</code>.",
+                "title": "List Completed Lessons in January 2025",
+                "req": "List all <code>Completed</code> lessons in January 2025, including student ID + name, tutor ID + name, and <code>lesson_date</code>.",
                 "analysis": (
-                    "Sử dụng phép nối trong (<code>INNER JOIN</code>) từ bảng <code>lessons</code> sang bảng <code>students</code> "
-                    "(theo <code>student_id</code>) và bảng <code>tutors</code> (theo <code>tutor_id</code>). "
-                    "Áp dụng bộ lọc <code>l.status = 'Completed'</code> kết hợp miền thời gian nửa mở "
-                    "<code>l.lesson_date &gt;= '2025-01-01' AND l.lesson_date &lt; '2025-02-01'</code> (giúp tận dụng chỉ mục B-Tree và an toàn tuyệt đối cho cả kiểu <code>DATE</code> lẫn <code>DATETIME</code>). "
-                    "Buổi học số 22 (ngày <code>2025-01-29</code> của học viên Bùi Đức Thịnh) có trạng thái <code>Cancelled</code> nên bị loại bỏ chính xác."
+                    "Perform an <code>INNER JOIN</code> from <code>lessons</code> to <code>students</code> "
+                    "(on <code>student_id</code>) and <code>tutors</code> (on <code>tutor_id</code>). "
+                    "Filter by <code>l.status = 'Completed'</code> combined with the half-open date range "
+                    "<code>l.lesson_date &gt;= '2025-01-01' AND l.lesson_date &lt; '2025-02-01'</code> (which preserves B-Tree index efficiency and is safe for both <code>DATE</code> and <code>DATETIME</code> types). "
+                    "Lesson 22 (on <code>2025-01-29</code> for student Bui Duc Thinh) has status <code>Cancelled</code> and is therefore accurately excluded."
                 ),
                 "sql": """SELECT
     l.lesson_id,
@@ -446,14 +446,14 @@ ORDER BY l.lesson_date ASC, l.lesson_id ASC;""",
             },
             {
                 "num": 2,
-                "title": "Đếm tổng số buổi học theo từng môn học trong Quý I/2025",
-                "req": "Đếm tổng số buổi học theo từng môn học trong Quý I/2025 (<code>01/01/2025</code> đến hết <code>31/03/2025</code>), tính mọi trạng thái; hiển thị cả nhóm có số lượng bằng <code>0</code>.",
+                "title": "Count Total Lessons per Subject in Q1/2025",
+                "req": "Count the total number of lessons per subject in Q1/2025 (from <code>2025-01-01</code> through <code>2025-03-31</code>) across all statuses; include subjects with a count of <code>0</code>.",
                 "analysis": (
-                    "Xuất phát từ bảng gốc <code>subjects</code> và dùng <code>LEFT JOIN</code> sang <code>tutors</code> rồi tới <code>lessons</code>. "
-                    "<strong>Kỹ thuật trọng tâm:</strong> Điều kiện lọc thời gian Quý I/2025 (<code>l.lesson_date &gt;= '2025-01-01' AND l.lesson_date &lt; '2025-04-01'</code>) "
-                    "bắt buộc phải đặt ngay trong mệnh đề <code>ON</code> của phép <code>LEFT JOIN lessons</code> thay vì đặt ở <code>WHERE</code>. "
-                    "Nếu đặt ở <code>WHERE</code>, các môn học không có giao dịch trong Quý I/2025 (như <em>Kinh tế vĩ mô 1</em> chỉ có buổi học năm 2024 và <em>Pháp luật đại cương</em> chưa có buổi học nào) sẽ bị biến thành <code>INNER JOIN</code> và biến mất khỏi kết quả. "
-                    "Hàm <code>COUNT(l.lesson_id)</code> chỉ đếm các dòng khác <code>NULL</code> nên trả về đúng <code>0</code> cho 2 môn học này."
+                    "Start from the parent table <code>subjects</code> and perform a <code>LEFT JOIN</code> to <code>tutors</code> and then to <code>lessons</code>. "
+                    "<strong>Key Technical Point:</strong> The Q1/2025 date filter (<code>l.lesson_date &gt;= '2025-01-01' AND l.lesson_date &lt; '2025-04-01'</code>) "
+                    "must be placed directly inside the <code>ON</code> clause of the <code>LEFT JOIN lessons</code> rather than in the <code>WHERE</code> clause. "
+                    "Placing it in <code>WHERE</code> would convert the outer join into an inner join and eliminate subjects with zero Q1/2025 lessons (such as <em>Macroeconomics 1</em>, which only had lessons in 2024, and <em>General Law</em>, which has no lessons at all). "
+                    "Using <code>COUNT(l.lesson_id)</code> counts only non-NULL lesson IDs, accurately returning <code>0</code> for those two subjects."
                 ),
                 "sql": """SELECT
     sub.subject_id,
@@ -469,13 +469,13 @@ ORDER BY total_lessons_q1_2025 DESC, sub.subject_id ASC;""",
             },
             {
                 "num": 3,
-                "title": "Liệt kê học viên có buổi học chưa có báo cáo (loại trừ Cancelled)",
-                "req": "Liệt kê các học viên có ít nhất một buổi học chưa có báo cáo buổi học, loại trừ <code>Cancelled</code>. Mỗi người chỉ xuất hiện một lần.",
+                "title": "List Students with Unreported Lessons (Excluding Cancelled)",
+                "req": "List students who have at least one lesson without a lesson report, excluding <code>Cancelled</code> lessons. Each student must appear only once.",
                 "analysis": (
-                    "Thực hiện <code>JOIN</code> từ <code>students</code> sang <code>lessons</code> và <code>LEFT JOIN</code> sang <code>lesson_reports</code>. "
-                    "Buổi học chưa có báo cáo được xác định bởi điều kiện <code>lr.report_id IS NULL</code> (anti-join pattern), đồng thời loại trừ các buổi đã hủy bằng <code>l.status &lt;&gt; 'Cancelled'</code>. "
-                    "Do một học viên có thể có nhiều buổi học đang chờ báo cáo (ví dụ học viên <code>student_id = 8</code> Bùi Đức Thịnh có 2 buổi <code>Pending</code> là buổi 19 và 20), "
-                    "ta sử dụng từ khóa <code>SELECT DISTINCT</code> để đảm bảo mỗi học viên chỉ xuất hiện duy nhất một lần. Học viên số 5 (Hoàng Mai Linh) chỉ có buổi chưa báo cáo thuộc trạng thái <code>Cancelled</code> nên được loại trừ chính xác."
+                    "Perform an <code>INNER JOIN</code> from <code>students</code> to <code>lessons</code> and a <code>LEFT JOIN</code> to <code>lesson_reports</code>. "
+                    "Lessons lacking a report are identified via the anti-join condition <code>lr.report_id IS NULL</code>, while cancelled lessons are excluded with <code>l.status &lt;&gt; 'Cancelled'</code>. "
+                    "Because a student may have multiple unreported <code>Pending</code> lessons (for example, <code>student_id = 8</code> Bui Duc Thinh has 2 <code>Pending</code> lessons: 19 and 20), "
+                    "<code>SELECT DISTINCT</code> guarantees that each student appears at most once. Student 5 (Hoang Mai Linh) only has an unreported lesson with status <code>Cancelled</code> and is properly excluded."
                 ),
                 "sql": """SELECT DISTINCT
     s.student_id,
@@ -489,13 +489,13 @@ ORDER BY s.student_id ASC;""",
             },
             {
                 "num": 4,
-                "title": "Tính học phí trung bình trên một giao dịch Completed của từng môn học",
-                "req": "Tính học phí trung bình trên một giao dịch <code>Completed</code> của từng môn học, xét toàn bộ thời gian; chỉ lấy nhóm đã phát sinh chi phí.",
+                "title": "Average Tuition Fee per Completed Lesson by Subject",
+                "req": "Calculate the average tuition fee per <code>Completed</code> lesson for each subject across all time; include only subjects that have incurred fees.",
                 "analysis": (
-                    "Sử dụng <code>INNER JOIN</code> xuyên suốt từ <code>subjects → tutors → lessons → lesson_reports</code> với điều kiện <code>l.status = 'Completed'</code>. "
-                    "Vì đề bài yêu cầu <em>chỉ lấy nhóm đã phát sinh chi phí</em>, phép <code>INNER JOIN</code> tự động loại bỏ môn <em>Pháp luật đại cương</em> (chưa có buổi học hoàn thành). "
-                    "<strong>Chống cộng lặp chi phí:</strong> Tuyệt đối không nối bảng <code>payments</code> trong câu truy vấn này vì nếu một buổi học trả góp 2 lần (như <code>lesson_id = 1</code> và <code>lesson_id = 6</code> của môn <em>Phân tích dữ liệu với Python</em>), "
-                    "phép nối với <code>payments</code> sẽ nhân đôi bản ghi học phí của buổi đó và làm sai lệch giá trị trung bình <code>AVG(lr.fee)</code>."
+                    "Use <code>INNER JOIN</code> across the chain <code>subjects → tutors → lessons → lesson_reports</code> with the filter <code>l.status = 'Completed'</code>. "
+                    "Because the specification requires <em>only subjects that have incurred fees</em>, <code>INNER JOIN</code> naturally excludes <em>General Law</em> (which has no completed lessons). "
+                    "<strong>Anti-Fanout / Chasm Trap Prevention:</strong> We strictly avoid joining the <code>payments</code> table here; if a lesson was paid in two installments (such as <code>lesson_id = 1</code> and <code>lesson_id = 6</code> in <em>Data Analysis with Python</em>), "
+                    "joining <code>payments</code> would duplicate those lessons' fee rows and distort <code>AVG(lr.fee)</code>."
                 ),
                 "sql": """SELECT
     sub.subject_id,
@@ -512,13 +512,13 @@ ORDER BY avg_completed_fee DESC, sub.subject_id ASC;""",
             },
             {
                 "num": 5,
-                "title": "Top 3 gia sư có nhiều buổi học Completed nhất trong năm 2025",
-                "req": "Liệt kê 3 gia sư có nhiều buổi học <code>Completed</code> nhất trong năm 2025. Nếu bằng nhau, ưu tiên <code>tutor_id</code> tăng dần; chỉ lấy đối tượng có giao dịch.",
+                "title": "Top 3 Tutors with the Most Completed Lessons in 2025",
+                "req": "List the top 3 tutors with the highest number of <code>Completed</code> lessons in 2025. Break ties by <code>tutor_id</code> ascending; include only tutors with activity.",
                 "analysis": (
-                    "Dùng <code>INNER JOIN</code> giữa <code>tutors</code> và <code>lessons</code> kèm điều kiện <code>l.status = 'Completed'</code> và năm 2025 (<code>l.lesson_date &gt;= '2025-01-01' AND l.lesson_date &lt; '2026-01-01'</code>) "
-                    "để chỉ lấy các gia sư thực sự có giao dịch hoàn thành trong năm 2025. "
-                    "Gom nhóm theo <code>t.tutor_id, t.full_name</code> và sắp xếp theo <code>ORDER BY completed_lessons_2025 DESC, t.tutor_id ASC LIMIT 3</code>. "
-                    "Trên bộ dữ liệu thực tế, gia sư số 1 (TS. Trần Hùng) và gia sư số 2 (TS. Vũ Đức Minh) cùng có 4 buổi <code>Completed</code>, hệ thống tự động ưu tiên xếp <code>tutor_id = 1</code> đứng trước."
+                    "Use an <code>INNER JOIN</code> between <code>tutors</code> and <code>lessons</code> filtered by <code>l.status = 'Completed'</code> and the 2025 date range (<code>l.lesson_date &gt;= '2025-01-01' AND l.lesson_date &lt; '2026-01-01'</code>) "
+                    "so that only tutors with completed lessons in 2025 are considered. "
+                    "Group by <code>t.tutor_id, t.full_name</code> and sort using <code>ORDER BY completed_lessons_2025 DESC, t.tutor_id ASC LIMIT 3</code>. "
+                    "In the dataset, Tutor 1 (Dr. Tran Hung) and Tutor 2 (Dr. Vu Duc Minh) both have 4 <code>Completed</code> lessons in 2025, and the tie-breaker orders <code>tutor_id = 1</code> first."
                 ),
                 "sql": """SELECT
     t.tutor_id,
@@ -535,12 +535,12 @@ LIMIT 3;""",
             },
             {
                 "num": 6,
-                "title": "Tổng số tiền từng học viên đã thanh toán trong năm 2025",
-                "req": "Tính tổng số tiền từng học viên đã thanh toán trong năm 2025 theo <code>payment_date</code>; hiển thị cả người chưa trả tiền với tổng bằng <code>0</code>.",
+                "title": "Total Amount Paid by Each Student in 2025",
+                "req": "Calculate the total amount paid by each student in 2025 based on <code>payment_date</code>; display <code>0</code> for students who made no payments.",
                 "analysis": (
-                    "Bắt đầu từ bảng <code>students</code>, thực hiện <code>LEFT JOIN lessons</code> và <code>LEFT JOIN payments</code>. "
-                    "Điều kiện lọc ngày thanh toán trong năm 2025 (<code>p.payment_date &gt;= '2025-01-01' AND p.payment_date &lt; '2026-01-01'</code>) được đặt ngay tại mệnh đề <code>ON</code> của phép <code>LEFT JOIN payments</code>. "
-                    "Nhờ đó, cả những học viên chỉ thanh toán trong năm 2024 (học viên 6 Đặng Tuấn Kiệt, học viên 9 Đỗ Khánh Huyền), học viên nợ 100% (học viên 7 Vũ Ngọc Hà) và học viên chưa từng học (học viên 10 Ngô Hải Đăng, học viên 11 Lý Thanh Trúc) đều được giữ lại đầy đủ và hiển thị <code>0.00</code> thông qua hàm <code>COALESCE(SUM(p.amount), 0.00)</code>."
+                    "Start from <code>students</code> and perform a <code>LEFT JOIN</code> to <code>lessons</code> and <code>LEFT JOIN</code> to <code>payments</code>. "
+                    "The 2025 payment date filter (<code>p.payment_date &gt;= '2025-01-01' AND p.payment_date &lt; '2026-01-01'</code>) is placed inside the <code>ON</code> clause of <code>LEFT JOIN payments</code>. "
+                    "Consequently, students who only paid in 2024 (Student 6 Dang Tuan Kiet, Student 9 Do Khanh Huyen), students with 100% unpaid balance (Student 7 Vu Ngoc Ha), and students who never took a lesson (Student 10 Ngo Hai Dang, Student 11 Ly Thanh Truc) are all preserved and displayed with <code>0.00</code> via <code>COALESCE(SUM(p.amount), 0.00)</code>."
                 ),
                 "sql": """SELECT
     s.student_id,
@@ -556,13 +556,13 @@ ORDER BY total_paid_2025 DESC, s.student_id ASC;""",
             },
             {
                 "num": 7,
-                "title": "Liệt kê các học viên chưa có bất kỳ bản ghi thanh toán nào",
-                "req": "Liệt kê các học viên chưa có bất kỳ bản ghi thanh toán nào trong toàn bộ dữ liệu, kể cả người chưa có giao dịch.",
+                "title": "List Students with Zero Payment Records Across All Time",
+                "req": "List all students who do not have any payment records across the entire dataset, including students who have never had a lesson.",
                 "analysis": (
-                    "Thực hiện <code>LEFT JOIN</code> từ <code>students</code> sang <code>lessons</code> và <code>payments</code> trên toàn bộ thời gian. "
-                    "Gom nhóm theo từng học viên và lọc bằng <code>HAVING COUNT(p.payment_id) = 0</code>. "
-                    "Kết quả trả về đầy đủ 2 nhóm đối tượng: (1) Học viên đã có lịch sử buổi học nhưng chưa trả tiền lần nào (Vũ Ngọc Hà <code>student_id = 7</code>, Bùi Đức Thịnh <code>student_id = 8</code>) "
-                    "và (2) Học viên mới đăng ký chưa từng phát sinh buổi học (Ngô Hải Đăng <code>student_id = 10</code>, Lý Thanh Trúc <code>student_id = 11</code>)."
+                    "Perform a <code>LEFT JOIN</code> from <code>students</code> to <code>lessons</code> and <code>payments</code> across all time. "
+                    "Group by student and filter using <code>HAVING COUNT(p.payment_id) = 0</code>. "
+                    "The result captures both edge-case groups: (1) Students who have lesson history but have never made a payment (Vu Ngoc Ha <code>student_id = 7</code>, Bui Duc Thinh <code>student_id = 8</code>) "
+                    "and (2) Newly registered students who have never booked a lesson (Ngo Hai Dang <code>student_id = 10</code>, Ly Thanh Truc <code>student_id = 11</code>)."
                 ),
                 "sql": """SELECT
     s.student_id,
@@ -578,13 +578,13 @@ ORDER BY s.student_id ASC;""",
             },
             {
                 "num": 8,
-                "title": "Xếp hạng toàn bộ học viên theo tổng học phí đã xác nhận giảm dần",
-                "req": "Liệt kê toàn bộ học viên theo tổng học phí đã xác nhận giảm dần, không phụ thuộc đã thanh toán hay chưa; nếu bằng nhau, sắp theo mã tăng dần.",
+                "title": "Rank All Students by Total Confirmed Tuition Fee Descending",
+                "req": "List all students ordered by total confirmed tuition fee descending, regardless of whether they have paid; break ties by <code>student_id</code> ascending.",
                 "analysis": (
-                    "<strong>Chống cộng lặp chi phí:</strong> Học phí đã xác nhận nằm ở bảng <code>lesson_reports</code> (quan hệ 1-1 chặt chẽ với <code>lessons</code> nhờ ràng buộc <code>lesson_id UNIQUE</code>). "
-                    "Do đó, ta chỉ thực hiện <code>LEFT JOIN</code> từ <code>students</code> sang <code>lessons</code> (lọc <code>l.status = 'Completed'</code>) và <code>lesson_reports</code> mà tuyệt đối không nối bảng <code>payments</code>. "
-                    "Nếu nối thêm <code>payments</code>, học viên Lê Hoàng Minh Khôi (<code>student_id = 1</code>, có buổi học số 1 trả 2 lần) sẽ bị cộng lặp thêm 500,000 VNĐ. "
-                    "Các học viên có cùng mức học phí (ví dụ học viên 6 và 9 cùng đạt <code>400000.00</code>; học viên 8, 10, 11 cùng đạt <code>0.00</code>) được sắp xếp chính xác theo <code>student_id ASC</code>."
+                    "<strong>Anti-Fanout / Chasm Trap Prevention:</strong> Confirmed tuition fees reside in <code>lesson_reports</code> (which has a strict 1–1 relationship with <code>lessons</code> via <code>lesson_id UNIQUE</code>). "
+                    "Thus, we perform a <code>LEFT JOIN</code> from <code>students</code> to <code>lessons</code> (with <code>l.status = 'Completed'</code>) and <code>lesson_reports</code> without joining <code>payments</code>. "
+                    "If <code>payments</code> were joined directly, Le Hoang Minh Khoi (<code>student_id = 1</code>, who paid for Lesson 1 in 2 installments) would have Lesson 1's fee of 500,000 VND double-counted. "
+                    "Students tied in total confirmed fee (e.g., Students 6 and 9 at <code>400000.00</code>; Students 8, 10, 11 at <code>0.00</code>) are ordered deterministically by <code>student_id ASC</code>."
                 ),
                 "sql": """SELECT
     s.student_id,
@@ -599,12 +599,12 @@ ORDER BY total_confirmed_fee DESC, s.student_id ASC;""",
             },
             {
                 "num": 9,
-                "title": "Tính tỷ lệ hủy buổi học của từng gia sư trong năm 2025",
-                "req": "Tính tỷ lệ hủy của từng gia sư trong năm 2025: <code>(số buổi học Cancelled / tổng số buổi học của năm) * 100</code>. Làm tròn 2 chữ số thập phân; trả <code>NULL</code> nếu tổng bằng <code>0</code>.",
+                "title": "Calculate Each Tutor's Lesson Cancellation Rate in 2025",
+                "req": "Calculate the cancellation rate for each tutor in 2025: <code>(Cancelled lessons / total lessons in 2025) * 100</code>. Round to 2 decimal places; return <code>NULL</code> if total lessons is <code>0</code>.",
                 "analysis": (
-                    "Sử dụng <code>LEFT JOIN</code> từ <code>tutors</code> sang <code>lessons</code> với điều kiện năm 2025 đặt trong <code>ON</code> để giữ lại cả gia sư không có buổi dạy nào trong năm 2025 (gia sư số 6 ThS. Phạm Đức Chung chỉ dạy trong năm 2024). "
-                    "Đếm số buổi hủy bằng biểu thức điều kiện <code>SUM(CASE WHEN l.status = 'Cancelled' THEN 1 ELSE 0 END)</code>. "
-                    "Để xử lý chia cho 0 một cách an toàn và trả về <code>NULL</code> đúng yêu cầu khi tổng số buổi học trong năm bằng 0, ta dùng hàm <code>NULLIF(COUNT(l.lesson_id), 0)</code> ở mẫu số, sau đó bọc ngoài bằng <code>ROUND(..., 2)</code>."
+                    "Use a <code>LEFT JOIN</code> from <code>tutors</code> to <code>lessons</code> with the 2025 date range inside the <code>ON</code> clause so tutors with no lessons in 2025 are retained (Tutor 6 M.Sc. Pham Duc Chung only taught in 2024). "
+                    "Count cancelled lessons conditionally via <code>SUM(CASE WHEN l.status = 'Cancelled' THEN 1 ELSE 0 END)</code>. "
+                    "To prevent division by zero and return <code>NULL</code> when a tutor has 0 lessons in 2025, use <code>NULLIF(COUNT(l.lesson_id), 0)</code> in the denominator wrapped inside <code>ROUND(..., 2)</code>."
                 ),
                 "sql": """SELECT
     t.tutor_id,
@@ -625,12 +625,12 @@ ORDER BY t.tutor_id ASC;""",
             },
             {
                 "num": 10,
-                "title": "Liệt kê các học viên có hơn 3 buổi học Completed trong năm 2025",
-                "req": "Liệt kê các học viên có hơn 3 buổi học <code>Completed</code> trong năm 2025, kèm số lần; sắp số lần giảm dần.",
+                "title": "List Students with More Than 3 Completed Lessons in 2025",
+                "req": "List students who have more than 3 <code>Completed</code> lessons in 2025, along with their lesson count; order by count descending.",
                 "analysis": (
-                    "Thực hiện <code>INNER JOIN</code> giữa <code>students</code> và <code>lessons</code>, lọc trạng thái <code>l.status = 'Completed'</code> và thời gian trong năm 2025 tại mệnh đề <code>WHERE</code>. "
-                    "Gom nhóm theo từng học viên (<code>GROUP BY s.student_id, s.full_name</code>) và áp dụng điều kiện lọc sau gom nhóm <code>HAVING COUNT(l.lesson_id) &gt; 3</code> (tức từ 4 buổi trở lên). "
-                    "Kết quả trích xuất chính xác 2 học viên tiêu biểu: Lê Hoàng Minh Khôi (5 buổi) và Nguyễn Phương Anh (4 buổi)."
+                    "Perform an <code>INNER JOIN</code> between <code>students</code> and <code>lessons</code>, filtering for <code>l.status = 'Completed'</code> and the 2025 date range in the <code>WHERE</code> clause. "
+                    "Group by student (<code>GROUP BY s.student_id, s.full_name</code>) and apply the post-aggregation filter <code>HAVING COUNT(l.lesson_id) &gt; 3</code> (i.e., 4 or more completed lessons). "
+                    "The query accurately returns the 2 qualifying students: Le Hoang Minh Khoi (5 lessons) and Nguyen Phuong Anh (4 lessons)."
                 ),
                 "sql": """SELECT
     s.student_id,
@@ -653,18 +653,18 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
             out_tbl = render_table(
                 headers,
                 rows,
-                caption=f"Bảng 4.{q['num']}: Kết quả thực thi Truy vấn {q['num']} trên MySQL.",
+                caption=f"Table 4.{q['num']}: Live execution result of Query {q['num']} on MySQL.",
             )
             queries_html_blocks.append(
                 f"""
                 <div class="query-card">
                     <div class="query-header">
-                        <span class="query-badge">Truy vấn {q['num']}</span>
+                        <span class="query-badge">Query {q['num']}</span>
                         <h3>{q['title']}</h3>
                     </div>
                     <div class="query-body">
-                        <p class="query-req"><strong>Yêu cầu đề bài:</strong> {q['req']}</p>
-                        <p class="query-analysis"><strong>Phân tích &amp; Hướng giải quyết:</strong> {q['analysis']}</p>
+                        <p class="query-req"><strong>Requirement:</strong> {q['req']}</p>
+                        <p class="query-analysis"><strong>Technical Analysis &amp; Solution Design:</strong> {q['analysis']}</p>
                         <pre class="sql-code"><code>{html.escape(q['sql'])}</code></pre>
                         {out_tbl}
                     </div>
@@ -672,21 +672,21 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
                 """
             )
 
-        # Kết quả 3 VIEW trong views.sql
+        # Extract results of the 3 VIEWs in views.sql
         tbl_v_detail = render_table(
             *run_query("SELECT * FROM v_detail ORDER BY lesson_id ASC;"),
-            caption="Bảng 5.1: Kết quả truy vấn thực tế từ VIEW v_detail (23 bản ghi buổi học toàn thời gian, giữ cả fee = NULL).",
+            caption="Table 5.1: Live query result from VIEW v_detail (all 23 lessons across all time, retaining fee = NULL for unreported lessons).",
             compact=True,
         )
         tbl_v_group = render_table(
             *run_query("SELECT * FROM v_group_summary ORDER BY subject_id ASC;"),
-            caption="Bảng 5.2: Kết quả truy vấn thực tế từ VIEW v_group_summary (Tổng hợp toàn bộ 6 môn học).",
+            caption="Table 5.2: Live query result from VIEW v_group_summary (all-time summary across all 6 subjects).",
         )
         tbl_v_debt = render_table(
             *run_query(
                 "SELECT * FROM v_debt ORDER BY remaining_debt DESC, student_id ASC;"
             ),
-            caption="Bảng 5.3: Kết quả truy vấn thực tế từ VIEW v_debt (Báo cáo công nợ của toàn bộ 11 học viên, chống cộng lặp chi phí).",
+            caption="Table 5.3: Live query result from VIEW v_debt (accounts receivable summary for all 11 students with anti-fanout protection).",
         )
 
     finally:
@@ -698,10 +698,10 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
     erd_svg = build_erd_svg()
 
     html_doc = f"""<!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Báo Cáo Đề 01: Quản Lý Trung Tâm Gia Sư (tutoring_mini)</title>
+<title>Report Topic 01: Tutoring Center Management System (tutoring_mini)</title>
 <style>
   @page {{
     size: A4 portrait;
@@ -778,15 +778,7 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
     font-weight: 800;
     color: #1e3a8a;
     letter-spacing: 0.6px;
-    margin: 0;
-    text-align: center;
-  }}
-  .uni-name-en {{
-    font-size: 9.5pt;
-    font-weight: 600;
-    color: #2563eb;
-    letter-spacing: 1px;
-    margin: 3px 0 10px 0;
+    margin: 0 0 10px 0;
     text-align: center;
   }}
   .faculty-name {{
@@ -796,21 +788,13 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
     margin: 0;
     text-align: center;
   }}
-  .faculty-name-en {{
-    font-size: 9pt;
-    font-weight: 600;
-    color: #0284c7;
-    letter-spacing: 0.8px;
-    margin: 3px 0 0 0;
-    text-align: center;
-  }}
 
   .logo-row {{
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 48px;
-    margin: 18px 0 10px 0;
+    margin: 22px 0 12px 0;
   }}
   .logo-box {{
     display: flex;
@@ -818,8 +802,8 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
     align-items: center;
   }}
   .logo-box img {{
-    width: 100px;
-    height: 100px;
+    width: 104px;
+    height: 104px;
     object-fit: contain;
     filter: drop-shadow(0 3px 6px rgba(15, 23, 42, 0.12));
   }}
@@ -833,7 +817,7 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
 
   .cover-title-block {{
     text-align: center;
-    padding: 16px 14px;
+    padding: 18px 14px;
     background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
     border-top: 2.5px solid #1e3a8a;
     border-bottom: 2.5px solid #1e3a8a;
@@ -841,14 +825,14 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
     margin: 8px 0;
   }}
   .report-type {{
-    font-size: 13pt;
+    font-size: 12.5pt;
     font-weight: 800;
     color: #1e40af;
     letter-spacing: 1px;
     margin-bottom: 8px;
   }}
   .report-main-title {{
-    font-size: 19pt;
+    font-size: 17.5pt;
     font-weight: 900;
     color: #0f172a;
     line-height: 1.28;
@@ -868,17 +852,6 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
 
   .cover-meta {{
     margin-top: 6px;
-  }}
-  .meta-info-grid {{
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px 18px;
-    background: #f8fafc;
-    border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    padding: 10px 16px;
-    margin-bottom: 14px;
-    font-size: 9.8pt;
   }}
   .meta-member-title {{
     font-size: 10pt;
@@ -1173,124 +1146,122 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
 <body>
 
 <!-- ===================================================================== -->
-<!-- TRANG BÌA (COVER PAGE)                                                -->
+<!-- COVER PAGE                                                            -->
 <!-- ===================================================================== -->
 <div class="cover-page">
   <div class="cover-inner-border">
     <div class="cover-top">
-      <div class="quoc-hieu">CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM</div>
-      <div class="tieu-ngu">Độc lập - Tự do - Hạnh phúc</div>
+      <div class="quoc-hieu">SOCIALIST REPUBLIC OF VIETNAM</div>
+      <div class="tieu-ngu">Independence - Freedom - Happiness</div>
       <div class="divider-short"></div>
 
-      <p class="uni-name">ĐẠI HỌC KINH TẾ QUỐC DÂN</p>
-      <p class="uni-name-en">NATIONAL ECONOMICS UNIVERSITY (NEU)</p>
-      <p class="faculty-name">KHOA KHOA HỌC DỮ LIỆU VÀ TRÍ TUỆ NHÂN TẠO</p>
-      <p class="faculty-name-en">FACULTY OF DATA SCIENCE AND ARTIFICIAL INTELLIGENCE (FDA)</p>
+      <p class="uni-name">NATIONAL ECONOMICS UNIVERSITY (NEU)</p>
+      <p class="faculty-name">FACULTY OF DATA SCIENCE AND ARTIFICIAL INTELLIGENCE (FDA)</p>
 
       <div class="logo-row">
         <div class="logo-box">
-          <img src="{neu_logo_uri}" alt="Logo NEU">
-          <span class="logo-caption">LOGO TRƯỜNG (NEU)</span>
+          <img src="{neu_logo_uri}" alt="NEU Logo">
+          <span class="logo-caption">UNIVERSITY LOGO (NEU)</span>
         </div>
         <div class="logo-box">
-          <img src="{fda_logo_uri}" alt="Logo FDA">
-          <span class="logo-caption">LOGO KHOA (FDA)</span>
+          <img src="{fda_logo_uri}" alt="FDA Logo">
+          <span class="logo-caption">FACULTY LOGO (FDA)</span>
         </div>
       </div>
     </div>
 
     <div class="cover-title-block">
-      <div class="report-type">BÁO CÁO BÀI TẬP THỰC HÀNH CƠ SỞ DỮ LIỆU MYSQL</div>
-      <h1 class="report-main-title">ĐỀ 01: QUẢN LÝ TRUNG TÂM GIA SƯ</h1>
+      <div class="report-type">MYSQL DATABASE PRACTICAL PROJECT REPORT</div>
+      <h1 class="report-main-title">TOPIC 01: TUTORING CENTER MANAGEMENT SYSTEM</h1>
       <div class="report-db-badge">Database Schema: tutoring_mini</div>
     </div>
 
     <div class="cover-meta">
-      <div class="meta-member-title">DANH SÁCH THÀNH VIÊN NHÓM THỰC HIỆN</div>
+      <div class="meta-member-title">PROJECT TEAM MEMBERS</div>
       <table class="member-table">
         <thead>
           <tr>
-            <th style="width: 8%; text-align: center;">STT</th>
-            <th style="width: 32%;">Họ và Tên Sinh viên</th>
-            <th style="width: 18%; text-align: center;">Mã Sinh viên</th>
-            <th style="width: 42%;">Phân công Nhiệm vụ</th>
+            <th style="width: 8%; text-align: center;">No.</th>
+            <th style="width: 32%;">Student Full Name</th>
+            <th style="width: 18%; text-align: center;">Student ID</th>
+            <th style="width: 42%;">Assigned Responsibilities</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td class="center-cell"><strong>1</strong></td>
-            <td><strong>Phạm Ngọc Danh</strong></td>
+            <td><strong>Pham Ngoc Danh</strong></td>
             <td class="center-cell"><strong>11251809</strong></td>
-            <td>Thiết kế lược đồ <code>schema.sql</code>, xây dựng VIEW <code>views.sql</code> &amp; Tổng hợp Báo cáo</td>
+            <td>Database schema design (<code>schema.sql</code>), analytical VIEWs (<code>views.sql</code>) &amp; Report compilation</td>
           </tr>
           <tr>
             <td class="center-cell"><strong>2</strong></td>
-            <td><strong>Nguyễn Mạnh Dũng</strong></td>
+            <td><strong>Nguyen Manh Dung</strong></td>
             <td class="center-cell"><strong>11252140</strong></td>
-            <td>Xây dựng dữ liệu mẫu <code>seed.sql</code>, kiểm chứng ràng buộc &amp; Nhóm truy vấn 1 – 5</td>
+            <td>Sample dataset design (<code>seed.sql</code>), integrity verification &amp; Queries 1 – 5</td>
           </tr>
           <tr>
             <td class="center-cell"><strong>3</strong></td>
-            <td><strong>Hoàng Đức Dương</strong></td>
+            <td><strong>Hoang Duc Duong</strong></td>
             <td class="center-cell"><strong>11252228</strong></td>
-            <td>Phát triển &amp; kiểm thử Nhóm truy vấn 6 – 10 trong <code>queries.sql</code> &amp; Đóng gói GitHub</td>
+            <td>Development &amp; testing of Queries 6 – 10 in <code>queries.sql</code> &amp; GitHub repository packaging</td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <div class="cover-footer">
-      HÀ NỘI — 2026
+      HANOI — 2026
     </div>
   </div>
 </div>
 
 <!-- ===================================================================== -->
-<!-- MỤC 1: TỔNG QUAN & PHÂN TÍCH BÀI TOÁN                                 -->
+<!-- SECTION 1: OVERVIEW & BUSINESS PROBLEM ANALYSIS                       -->
 <!-- ===================================================================== -->
 <div class="section-banner">
-  <h1>Mục 1. Tổng Quan &amp; Phân Tích Bài Toán Nghiệp Vụ</h1>
+  <h1>Section 1. Overview &amp; Business Problem Analysis</h1>
 </div>
 
-<h2>1.1. Mục tiêu và Bối cảnh Nghiệp vụ</h2>
+<h2>1.1. Objectives and Business Context</h2>
 <p>
-  Hệ thống Cơ sở dữ liệu <strong>Quản lý Trung tâm Gia sư (<code>tutoring_mini</code>)</strong> được thiết kế nhằm chuẩn hóa và tự động hóa toàn bộ quy trình vận hành cốt lõi của một trung tâm đào tạo gia sư hiện đại: từ quản lý danh mục môn học (<code>subjects</code>), hồ sơ năng lực đội ngũ gia sư (<code>tutors</code>), hồ sơ học viên (<code>students</code>), điều phối lịch học và trạng thái buổi học (<code>lessons</code>), cho đến lưu trữ biên bản đánh giá chuyên môn kiêm xác nhận học phí sau buổi học (<code>lesson_reports</code>) và theo dõi dòng tiền thu học phí nhiều đợt (<code>payments</code>).
+  The <strong>Tutoring Center Management System (<code>tutoring_mini</code>)</strong> relational database is engineered to standardize and automate the end-to-end operational workflow of a modern academic tutoring center: from managing the catalog of academic subjects (<code>subjects</code>), tutor qualifications and subject assignments (<code>tutors</code>), and student profiles (<code>students</code>), to coordinating lesson schedules and lifecycle statuses (<code>lessons</code>), recording post-lesson academic evaluations and confirmed tuition fees (<code>lesson_reports</code>), and tracking single or multi-installment tuition payments (<code>payments</code>).
 </p>
 
-<h2>1.2. Các Quy tắc Nghiệp vụ &amp; Ràng buộc Toàn vẹn Cốt lõi</h2>
+<h2>1.2. Core Business Rules &amp; Data Integrity Constraints</h2>
 <div class="callout">
-  <div class="callout-title">5 Quy tắc Toàn vẹn Nghiệp vụ Bắt buộc trong Hệ thống tutoring_mini</div>
+  <div class="callout-title">5 Mandatory Business &amp; Integrity Rules in tutoring_mini</div>
   <ol style="margin-bottom:0;">
-    <li><strong>Phân công Chuyên môn Gia sư (1 – N):</strong> Mỗi môn học có tên duy nhất (<code>UNIQUE</code>). Mỗi gia sư phụ trách giảng dạy một môn học xác định và có địa chỉ <code>email</code> định danh duy nhất.</li>
-    <li><strong>Vòng đời Trạng thái Buổi học (<code>ENUM</code>):</strong> Mỗi buổi học giữa một học viên và một gia sư chỉ mang một trong ba trạng thái chuẩn: <code>'Pending'</code> (Đã lên lịch/Chờ học), <code>'Completed'</code> (Đã hoàn thành), hoặc <code>'Cancelled'</code> (Đã hủy).</li>
-    <li><strong>Nghiệp vụ Báo cáo Buổi học (Quan hệ 1 – 1 chặt chẽ):</strong> Chỉ những buổi học có trạng thái <code>'Completed'</code> mới được lập <code>lesson_reports</code>, và <strong>mọi</strong> buổi học <code>'Completed'</code> đều bắt buộc có đúng 1 bản ghi <code>lesson_reports</code> (ràng buộc bởi khóa ngoại <code>lesson_id UNIQUE</code>, thời lượng <code>duration_minutes &gt; 0</code> và học phí <code>fee &gt;= 0</code>).</li>
-    <li><strong>Nghiệp vụ Thu tiền &amp; Trả góp (Quan hệ 1 – N):</strong> Học viên chỉ thanh toán cho các buổi học đã có báo cáo kết quả (<code>lesson_reports</code>). Một buổi học có thể được thanh toán một lần, trả góp nhiều lần (nhiều dòng trong <code>payments</code> cùng <code>lesson_id</code>) hoặc còn nợ, nhưng tổng số tiền đã thu (<code>SUM(amount)</code>) của một <code>lesson_id</code> không bao giờ vượt quá học phí đã xác nhận (<code>fee</code>).</li>
-    <li><strong>Chống cộng lặp chi phí (Anti-Fanout / Chasm Trap Prevention):</strong> Do <code>lesson_reports</code> có quan hệ 1–1 với <code>lessons</code> trong khi <code>payments</code> có quan hệ 1–N với <code>lessons</code>, khi tổng hợp đồng thời học phí (<code>fee</code>) và tiền đã trả (<code>amount</code>), hệ thống bắt buộc phải gom nhóm <code>payments</code> theo <code>lesson_id</code> trong Subquery/CTE trước khi nối với <code>lesson_reports</code> để tránh nhân bản học phí.</li>
+    <li><strong>Tutor Subject Assignment (1 – N):</strong> Each academic subject has a unique name (<code>UNIQUE</code>). Each tutor specializes in teaching one specific subject and holds a unique institutional <code>email</code> address.</li>
+    <li><strong>Lesson Status Lifecycle (<code>ENUM</code>):</strong> Every scheduled lesson between a student and a tutor must be in one of three states: <code>'Pending'</code> (Scheduled/Awaiting completion), <code>'Completed'</code> (Finished), or <code>'Cancelled'</code> (Cancelled).</li>
+    <li><strong>Post-Lesson Reporting Rule (Strict 1 – 1 Relationship):</strong> Only lessons with status <code>'Completed'</code> may have a <code>lesson_reports</code> entry, and <strong>every</strong> <code>'Completed'</code> lesson must have exactly one report (enforced via <code>lesson_id UNIQUE</code>, positive duration <code>duration_minutes &gt; 0</code>, and non-negative tuition fee <code>fee &gt;= 0</code>).</li>
+    <li><strong>Tuition Collection &amp; Installment Payments (1 – N Relationship):</strong> Payments are collected only for lessons that already have a confirmed report (<code>lesson_reports</code>). A lesson may be paid in full at once, paid across multiple installments (multiple rows in <code>payments</code> sharing the same <code>lesson_id</code>), or remain partially/fully unpaid, provided the cumulative amount paid (<code>SUM(amount)</code>) for any <code>lesson_id</code> never exceeds its confirmed tuition fee (<code>fee</code>).</li>
+    <li><strong>Anti-Fanout / Chasm Trap Prevention:</strong> Because <code>lesson_reports</code> has a 1–1 relationship with <code>lessons</code> whereas <code>payments</code> has a 1–N relationship with <code>lessons</code>, any query or view that simultaneously aggregates confirmed fees (<code>fee</code>) and paid amounts (<code>amount</code>) must pre-aggregate <code>payments</code> by <code>lesson_id</code> inside a Subquery/CTE before joining to <code>lesson_reports</code> so that tuition fees are never multiplied.</li>
   </ol>
 </div>
 
 <!-- ===================================================================== -->
-<!-- MỤC 2: THIẾT KẾ CƠ SỞ DỮ LIỆU (PHẦN A)                                -->
+<!-- SECTION 2: DATABASE SCHEMA DESIGN (PART A)                            -->
 <!-- ===================================================================== -->
 <div class="section-banner">
-  <h1>Mục 2. Thiết Kế Cơ Sở Dữ Liệu (Phần A — schema.sql)</h1>
+  <h1>Section 2. Database Schema Design (Part A — schema.sql)</h1>
 </div>
 
-<h2>2.1. Sơ đồ Quan hệ Thực thể (Entity-Relationship Diagram — ERD)</h2>
+<h2>2.1. Entity-Relationship Diagram (ERD)</h2>
 <p>
-  Cơ sở dữ liệu <code>tutoring_mini</code> được thiết kế đạt chuẩn dạng chuẩn 3 (<strong>3NF</strong>), loại bỏ hoàn toàn dư thừa dữ liệu và dị thường cập nhật. Sơ đồ quan hệ giữa 6 bảng được biểu diễn trực quan tại Hình 2.1:
+  The <code>tutoring_mini</code> database is normalized to Third Normal Form (<strong>3NF</strong>), eliminating data redundancy and update, insertion, or deletion anomalies. The relationships among the 6 tables are illustrated in Figure 2.1:
 </p>
 {erd_svg}
 
-<h2>2.2. Đặc tả Chi tiết Cấu trúc 6 Bảng và Giải thích Ràng buộc</h2>
+<h2>2.2. Detailed Specification of the 6 Tables and Integrity Constraints</h2>
 <div class="table-wrap">
   <table class="data-table compact-table">
     <thead>
       <tr>
-        <th style="width:14%;">Tên Bảng</th>
-        <th style="width:24%;">Các Trường (Khóa chính đứng đầu)</th>
-        <th style="width:18%;">Khóa Chính / Khóa Ngoại</th>
-        <th style="width:44%;">Ràng buộc Toàn vẹn (UNIQUE, CHECK, ENUM) &amp; Giải thích Thiết kế</th>
+        <th style="width:14%;">Table Name</th>
+        <th style="width:24%;">Columns (Primary Key First)</th>
+        <th style="width:18%;">Primary / Foreign Keys</th>
+        <th style="width:44%;">Integrity Constraints (UNIQUE, CHECK, ENUM) &amp; Design Rationale</th>
       </tr>
     </thead>
     <tbody>
@@ -1298,139 +1269,139 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
         <td><code>subjects</code></td>
         <td><code>subject_id</code>, <code>name</code></td>
         <td><strong>PK:</strong> <code>subject_id</code></td>
-        <td><code>name VARCHAR(100) NOT NULL UNIQUE</code> — Đảm bảo không trùng lặp tên môn học trong danh mục đào tạo.</td>
+        <td><code>name VARCHAR(100) NOT NULL UNIQUE</code> — Prevents duplicate subject names in the academic catalog.</td>
       </tr>
       <tr>
         <td><code>tutors</code></td>
         <td><code>tutor_id</code>, <code>full_name</code>, <code>email</code>, <code>qualification</code>, <code>subject_id</code></td>
         <td><strong>PK:</strong> <code>tutor_id</code><br><strong>FK:</strong> <code>subject_id</code> → <code>subjects(subject_id)</code></td>
-        <td>Mọi cột đều <code>NOT NULL</code>; <code>email UNIQUE</code> chống đăng ký trùng tài khoản gia sư; <code>FK</code> đảm bảo gia sư luôn thuộc môn học hợp lệ.</td>
+        <td>All columns are <code>NOT NULL</code>; <code>email UNIQUE</code> prevents duplicate tutor accounts; <code>FK</code> ensures every tutor is assigned to a valid subject.</td>
       </tr>
       <tr>
         <td><code>students</code></td>
         <td><code>student_id</code>, <code>full_name</code>, <code>dob</code>, <code>phone</code></td>
         <td><strong>PK:</strong> <code>student_id</code></td>
-        <td><code>full_name</code>, <code>dob (DATE)</code>, <code>phone</code> đều <code>NOT NULL</code> — Lưu trữ đầy đủ thông tin định danh và liên lạc của học viên.</td>
+        <td><code>full_name</code>, <code>dob (DATE)</code>, and <code>phone</code> are all <code>NOT NULL</code> — Stores complete identity and contact records for each student.</td>
       </tr>
       <tr>
         <td><code>lessons</code></td>
         <td><code>lesson_id</code>, <code>student_id</code>, <code>tutor_id</code>, <code>lesson_date</code>, <code>status</code></td>
         <td><strong>PK:</strong> <code>lesson_id</code><br><strong>FK1:</strong> <code>student_id</code> → <code>students</code><br><strong>FK2:</strong> <code>tutor_id</code> → <code>tutors</code></td>
-        <td><code>lesson_date DATE NOT NULL</code>; <code>status ENUM('Pending', 'Completed', 'Cancelled') NOT NULL</code> — Giới hạn chặt miền trạng thái buổi học ngay tại tầng lưu trữ.</td>
+        <td><code>lesson_date DATE NOT NULL</code>; <code>status ENUM('Pending', 'Completed', 'Cancelled') NOT NULL</code> — Strictly restricts lesson status values at the storage engine level.</td>
       </tr>
       <tr>
         <td><code>lesson_reports</code></td>
         <td><code>report_id</code>, <code>lesson_id</code>, <code>content</code>, <code>feedback</code>, <code>duration_minutes</code>, <code>fee</code></td>
         <td><strong>PK:</strong> <code>report_id</code><br><strong>FK + UQ:</strong> <code>lesson_id</code> → <code>lessons(lesson_id)</code></td>
-        <td><code>lesson_id UNIQUE</code> ép buộc quan hệ <strong>1–1</strong> (mỗi buổi học có tối đa 1 báo cáo); <code>CHECK (duration_minutes &gt; 0)</code> và <code>CHECK (fee &gt;= 0)</code> bảo vệ miền giá trị hợp lệ.</td>
+        <td><code>lesson_id UNIQUE</code> enforces a strict <strong>1–1</strong> relationship (at most one report per lesson); <code>CHECK (duration_minutes &gt; 0)</code> and <code>CHECK (fee &gt;= 0)</code> enforce valid numeric domains.</td>
       </tr>
       <tr>
         <td><code>payments</code></td>
         <td><code>payment_id</code>, <code>lesson_id</code>, <code>amount</code>, <code>payment_date</code>, <code>method</code></td>
         <td><strong>PK:</strong> <code>payment_id</code><br><strong>FK:</strong> <code>lesson_id</code> → <code>lessons(lesson_id)</code></td>
-        <td>Không đặt <code>UNIQUE</code> trên <code>lesson_id</code> để cho phép trả góp nhiều lần (1–N); <code>CHECK (amount &gt; 0)</code>; <code>method ENUM('Cash', 'BankTransfer', 'Card') NOT NULL</code>.</td>
+        <td>No <code>UNIQUE</code> constraint on <code>lesson_id</code> to allow multi-installment payments (1–N); <code>CHECK (amount &gt; 0)</code>; <code>method ENUM('Cash', 'BankTransfer', 'Card') NOT NULL</code>.</td>
       </tr>
     </tbody>
   </table>
-  <div class="table-caption">Bảng 2.1: Tổng hợp thiết kế cấu trúc 6 bảng và các ràng buộc toàn vẹn trong <code>schema.sql</code>.</div>
+  <div class="table-caption">Table 2.1: Summary of the 6-table schema architecture and integrity constraints in <code>schema.sql</code>.</div>
 </div>
 
 <p>
-  <strong>Lưu ý kỹ thuật MySQL:</strong> Trong MySQL 8.0/9.0, ràng buộc <code>CHECK</code> không cho phép chứa câu truy vấn con (Subquery) tham chiếu sang bảng khác. Do đó, các ràng buộc nội bảng (<code>duration_minutes &gt; 0</code>, <code>fee &gt;= 0</code>, <code>amount &gt; 0</code>) được khai báo trực tiếp bằng <code>CHECK</code> trong <code>schema.sql</code>, còn các quy tắc liên bảng (chỉ buổi <code>Completed</code> mới có báo cáo, tổng <code>amount &lt;= fee</code>) được kiểm chứng chặt chẽ bằng bộ truy vấn đối soát ở cuối tệp <code>seed.sql</code>.
+  <strong>MySQL Technical Note:</strong> In MySQL 8.0/9.0, <code>CHECK</code> constraints cannot contain subqueries referencing other tables. Therefore, single-table domain rules (<code>duration_minutes &gt; 0</code>, <code>fee &gt;= 0</code>, <code>amount &gt; 0</code>) are enforced directly via declarative <code>CHECK</code> constraints in <code>schema.sql</code>, while cross-table business rules (only <code>Completed</code> lessons have reports, and cumulative <code>amount &lt;= fee</code>) are verified via automated reconciliation queries at the end of <code>seed.sql</code>.
 </p>
 
-<h2>2.3. Mã nguồn Tệp <code>schema.sql</code> Hoàn chỉnh</h2>
+<h2>2.3. Complete Source Code of <code>schema.sql</code></h2>
 <pre class="sql-code"><code>{html.escape(schema_code)}</code></pre>
 
 <!-- ===================================================================== -->
-<!-- MỤC 3: NẠP DỮ LIỆU MẪU & KIỂM CHỨNG (PHẦN B)                          -->
+<!-- SECTION 3: SAMPLE DATA & INTEGRITY VERIFICATION (PART B)              -->
 <!-- ===================================================================== -->
 <div class="section-banner section-page-break">
-  <h1>Mục 3. Nạp Dữ Liệu Mẫu &amp; Kiểm Chứng (Phần B — seed.sql)</h1>
+  <h1>Section 3. Sample Data &amp; Integrity Verification (Part B — seed.sql)</h1>
 </div>
 
-<h2>3.1. Ma trận Thiết kế Kịch bản Dữ liệu Mẫu Bao phủ Toàn bộ Edge-Cases</h2>
+<h2>3.1. Sample Dataset Design Matrix Covering All Required Edge Cases</h2>
 <p>
-  Bộ dữ liệu mẫu trong <code>seed.sql</code> được thiết kế vượt mức tối thiểu của đề bài và bao phủ chính xác tất cả 10 nhóm kịch bản biên (edge-cases) để kiểm thử toàn diện 10 câu truy vấn và 3 VIEW:
+  The sample dataset in <code>seed.sql</code> exceeds all minimum row-count thresholds and is systematically designed to cover all 10 required edge-case scenarios for testing the 10 analytical queries and 3 VIEWs:
 </p>
 
 <div class="table-wrap">
   <table class="data-table compact-table">
     <thead>
       <tr>
-        <th style="width:5%;">STT</th>
-        <th style="width:35%;">Yêu cầu Kịch bản Dữ liệu của Đề bài</th>
-        <th style="width:20%;">Số lượng Thực tế</th>
-        <th style="width:40%;">Bản ghi Cụ thể Minh chứng trong <code>seed.sql</code></th>
+        <th style="width:5%;">No.</th>
+        <th style="width:35%;">Required Data Scenario / Edge Case</th>
+        <th style="width:20%;">Actual Coverage</th>
+        <th style="width:40%;">Specific Records in <code>seed.sql</code></th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td class="center-cell">1</td>
-        <td>Số lượng bản ghi tối thiểu mỗi bảng</td>
+        <td>Minimum row count per table</td>
         <td>6 / 6 / 11 / 23 / 16 / 17</td>
         <td><code>subjects</code>=6 (≥5), <code>tutors</code>=6 (≥6), <code>students</code>=11 (≥10), <code>lessons</code>=23 (≥12), <code>lesson_reports</code>=16 (≥10), <code>payments</code>=17 (≥10).</td>
       </tr>
       <tr>
         <td class="center-cell">2</td>
-        <td>Đa dạng thời gian: Tháng 01/2025, Quý I/2025 (T2, T3), ngoài Quý I/2025, ngoài năm 2025</td>
-        <td>Đủ 4 phân vùng thời gian</td>
-        <td>• Tháng 01/2025: <code>lesson_id</code> 1, 2, 6, 10, 22<br>• Tháng 02 &amp; 03/2025: <code>lesson_id</code> 3, 4, 7, 8, 11, 12, 15, 17, 19, 20, 21, 23<br>• Ngoài Quý I/2025 (T5, T6/2025): <code>lesson_id</code> 5, 9, 13, 18<br>• Năm 2024: <code>lesson_id</code> 14 (<code>2024-11-15</code>), 16 (<code>2024-12-10</code>).</td>
+        <td>Temporal diversity: Jan 2025, rest of Q1/2025 (Feb, Mar), outside Q1/2025, outside 2025</td>
+        <td>All 4 time partitions covered</td>
+        <td>• Jan 2025: <code>lesson_id</code> 1, 2, 6, 10, 22<br>• Feb &amp; Mar 2025: <code>lesson_id</code> 3, 4, 7, 8, 11, 12, 15, 17, 19, 20, 21, 23<br>• Outside Q1/2025 (May, Jun 2025): <code>lesson_id</code> 5, 9, 13, 18<br>• Year 2024: <code>lesson_id</code> 14 (<code>2024-11-15</code>), 16 (<code>2024-12-10</code>).</td>
       </tr>
       <tr>
         <td class="center-cell">3</td>
-        <td>Đủ 3 trạng thái buổi học &amp; Tỷ lệ 1-1 tuyệt đối giữa <code>Completed</code> và <code>lesson_reports</code></td>
+        <td>All 3 lesson statuses &amp; strict 1–1 mapping between <code>Completed</code> and <code>lesson_reports</code></td>
         <td>16 Completed, 4 Pending, 3 Cancelled</td>
-        <td>Đúng 16/16 buổi <code>Completed</code> (<code>lesson_id</code> 1..16) có báo cáo trong <code>lesson_reports</code>; 0 buổi <code>Pending</code>/<code>Cancelled</code> có báo cáo.</td>
+        <td>All 16/16 <code>Completed</code> lessons (<code>lesson_id</code> 1..16) have reports in <code>lesson_reports</code>; 0 <code>Pending</code>/<code>Cancelled</code> lessons have reports.</td>
       </tr>
       <tr>
         <td class="center-cell">4</td>
-        <td>Ít nhất 1 học viên có <strong>hơn 3 buổi học Completed</strong> trong năm 2025 (≥ 4 buổi)</td>
-        <td>2 học viên đạt điều kiện</td>
-        <td>• <code>student_id = 1</code> (Lê Hoàng Minh Khôi): <strong>5 buổi</strong> Completed năm 2025 (buổi 1, 2, 3, 4, 5)<br>• <code>student_id = 2</code> (Nguyễn Phương Anh): <strong>4 buổi</strong> Completed năm 2025 (buổi 6, 7, 8, 9).</td>
+        <td>At least 1 student with <strong>more than 3 Completed lessons</strong> in 2025 (≥ 4 lessons)</td>
+        <td>2 qualifying students</td>
+        <td>• <code>student_id = 1</code> (Le Hoang Minh Khoi): <strong>5 Completed lessons</strong> in 2025 (lessons 1, 2, 3, 4, 5)<br>• <code>student_id = 2</code> (Nguyen Phuong Anh): <strong>4 Completed lessons</strong> in 2025 (lessons 6, 7, 8, 9).</td>
       </tr>
       <tr>
         <td class="center-cell">5</td>
-        <td>Ít nhất 1 học viên có lịch sử giao dịch nhưng chưa thanh toán lần nào</td>
-        <td>2 học viên</td>
-        <td>• <code>student_id = 7</code> (Vũ Ngọc Hà): Có buổi 15 (<code>Completed</code>, phí 450,000) và buổi 18 (<code>Pending</code>) nhưng 0 bản ghi <code>payments</code>.<br>• <code>student_id = 8</code> (Bùi Đức Thịnh): Có buổi 19, 20 (<code>Pending</code>) và 22 (<code>Cancelled</code>), 0 thanh toán.</td>
+        <td>At least 1 student with lesson history but zero payments</td>
+        <td>2 students</td>
+        <td>• <code>student_id = 7</code> (Vu Ngoc Ha): Has lesson 15 (<code>Completed</code>, fee 450,000) and lesson 18 (<code>Pending</code>), but 0 records in <code>payments</code>.<br>• <code>student_id = 8</code> (Bui Duc Thinh): Has lessons 19, 20 (<code>Pending</code>) and 22 (<code>Cancelled</code>), 0 payments.</td>
       </tr>
       <tr>
         <td class="center-cell">6</td>
-        <td>Ít nhất 1 học viên chưa từng có buổi học nào</td>
-        <td>2 học viên</td>
-        <td><code>student_id = 10</code> (Ngô Hải Đăng) và <code>student_id = 11</code> (Lý Thanh Trúc) — chưa từng có dòng nào trong <code>lessons</code>.</td>
+        <td>At least 1 student who has never had any lessons</td>
+        <td>2 students</td>
+        <td><code>student_id = 10</code> (Ngo Hai Dang) and <code>student_id = 11</code> (Ly Thanh Truc) — 0 rows in <code>lessons</code>.</td>
       </tr>
       <tr>
         <td class="center-cell">7</td>
-        <td>Ít nhất 1 giao dịch trả nhiều lần (nhiều bản ghi <code>payments</code> cùng <code>lesson_id</code>)</td>
-        <td>2 buổi học trả 2 đợt</td>
-        <td>• <code>lesson_id = 1</code>: <code>payment_id</code> 1 (300,000) + <code>payment_id</code> 2 (200,000) = 500,000 (trả đủ sau 2 lần).<br>• <code>lesson_id = 6</code>: <code>payment_id</code> 7 (200,000) + <code>payment_id</code> 8 (150,000) = 350,000 / 500,000 (trả 2 lần, còn nợ 150,000).</td>
+        <td>At least 1 lesson paid in multiple installments (multiple <code>payments</code> rows for the same <code>lesson_id</code>)</td>
+        <td>2 multi-installment lessons</td>
+        <td>• <code>lesson_id = 1</code>: <code>payment_id</code> 1 (300,000) + <code>payment_id</code> 2 (200,000) = 500,000 (fully paid in 2 installments).<br>• <code>lesson_id = 6</code>: <code>payment_id</code> 7 (200,000) + <code>payment_id</code> 8 (150,000) = 350,000 / 500,000 (paid in 2 installments, owes 150,000).</td>
       </tr>
       <tr>
         <td class="center-cell">8</td>
-        <td>Ít nhất 1 giao dịch còn nợ (tổng <code>amount &lt; fee</code>)</td>
-        <td>4 buổi học còn nợ</td>
-        <td><code>lesson_id = 6</code> (nợ 150,000), <code>lesson_id = 10</code> (nợ 200,000), <code>lesson_id = 13</code> (nợ 200,000), <code>lesson_id = 15</code> (nợ 450,000 — chưa trả lần nào).</td>
+        <td>At least 1 lesson with outstanding debt (total <code>amount &lt; fee</code>)</td>
+        <td>4 lessons with remaining debt</td>
+        <td><code>lesson_id = 6</code> (owes 150,000), <code>lesson_id = 10</code> (owes 200,000), <code>lesson_id = 13</code> (owes 200,000), <code>lesson_id = 15</code> (owes 450,000 — unpaid).</td>
       </tr>
       <tr>
         <td class="center-cell">9</td>
-        <td>Ít nhất 1 môn học chưa có giao dịch trong Quý I/2025</td>
-        <td>2 môn học</td>
-        <td>• <code>subject_id = 5</code> (Kinh tế vĩ mô 1): chỉ có 2 buổi học trong năm 2024.<br>• <code>subject_id = 6</code> (Pháp luật đại cương): chưa có buổi học nào toàn thời gian.</td>
+        <td>At least 1 subject with no lessons in Q1/2025</td>
+        <td>2 subjects</td>
+        <td>• <code>subject_id = 5</code> (Macroeconomics 1): only has 2 lessons in 2024.<br>• <code>subject_id = 6</code> (General Law): 0 lessons across all time.</td>
       </tr>
       <tr>
         <td class="center-cell">10</td>
-        <td>Ít nhất 1 gia sư chưa có giao dịch trong năm 2025</td>
-        <td>1 gia sư</td>
-        <td>• <code>tutor_id = 6</code> (ThS. Phạm Đức Chung): chỉ dạy 2 buổi trong năm 2024, chưa có giao dịch năm 2025.</td>
+        <td>At least 1 tutor with no lessons in 2025</td>
+        <td>1 tutor</td>
+        <td>• <code>tutor_id = 6</code> (M.Sc. Pham Duc Chung): taught 2 lessons in 2024, 0 lessons in 2025.</td>
       </tr>
     </tbody>
   </table>
-  <div class="table-caption">Bảng 3.0: Ma trận đối chiếu kịch bản dữ liệu mẫu trong <code>seed.sql</code> với toàn bộ yêu cầu đề bài.</div>
+  <div class="table-caption">Table 3.0: Traceability matrix mapping <code>seed.sql</code> sample data to all project requirements.</div>
 </div>
 
-<h2>3.2. Dữ liệu Thực tế Đã Nạp trong 6 Bảng</h2>
+<h2>3.2. Seeded Data Across the 6 Tables</h2>
 {tbl_subjects}
 {tbl_tutors}
 {tbl_students}
@@ -1438,56 +1409,56 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
 {tbl_reports}
 {tbl_payments}
 
-<h2>3.3. Kết quả Chạy Các Truy vấn Kiểm chứng Toàn vẹn trong <code>seed.sql</code></h2>
+<h2>3.3. Execution Results of Data Integrity Verification Queries in <code>seed.sql</code></h2>
 <p>
-  Cuối tệp <code>seed.sql</code> tích hợp 4 câu lệnh <code>SELECT</code> đối soát tự động nhằm chứng minh dữ liệu mẫu tuân thủ tuyệt đối quy tắc nghiệp vụ báo cáo (1–1 với <code>Completed</code>) và quy tắc thu tiền (<code>SUM(amount) &lt;= fee</code>):
+  At the end of <code>seed.sql</code>, 4 automated reconciliation <code>SELECT</code> queries verify that the seeded dataset strictly satisfies the 1–1 reporting rule (for <code>Completed</code> lessons) and the payment cap rule (<code>SUM(amount) &lt;= fee</code>):
 </p>
 {ver_1a}
 {ver_1b}
 {ver_2a}
 {ver_2b}
 
-<h2>3.4. Phân tích Các Câu lệnh <code>INSERT</code> Minh họa Vi phạm Ràng buộc (Đặt trong Chú thích)</h2>
+<h2>3.4. Analysis of Commented-Out Constraint Violation <code>INSERT</code> Statements</h2>
 <div class="callout callout-warn">
-  <div class="callout-title">4 Kịch bản Kiểm thử Âm tính (Negative Test Cases) được Đặt trong Chú thích Cuối Tệp seed.sql</div>
+  <div class="callout-title">4 Negative Test Cases Included as Comments at the End of seed.sql</div>
   <ul style="margin-bottom:0;">
-    <li><strong>Vi phạm Khóa ngoại (<code>FOREIGN KEY</code>):</strong> <code>INSERT INTO lessons ... VALUES (999, 1, '2025-04-01', 'Pending');</code> — Bị chặn bởi <code>fk_lessons_student</code> (Lỗi MySQL <code>ERROR 1452: Cannot add or update a child row</code>) do <code>student_id = 999</code> không tồn tại.</li>
-    <li><strong>Vi phạm Ràng buộc <code>duration_minutes &lt;= 0</code>:</strong> <code>INSERT INTO lesson_reports ... VALUES (17, 'Ôn tập Phân tích dữ liệu với Python', 'Tốt', 0, 450000.00);</code> — Bị chặn bởi <code>chk_report_duration</code> (Lỗi MySQL <code>ERROR 3819: Check constraint is violated</code>).</li>
-    <li><strong>Vi phạm Ràng buộc <code>amount &lt;= 0</code>:</strong> <code>INSERT INTO payments ... VALUES (1, -50000.00, '2025-01-15', 'Cash');</code> — Bị chặn bởi <code>chk_payment_amount</code> (Lỗi MySQL <code>ERROR 3819</code>).</li>
-    <li><strong>Vi phạm Ràng buộc Trùng <code>lesson_id</code> (<code>UNIQUE</code>):</strong> <code>INSERT INTO lesson_reports (lesson_id, ...) VALUES (1, ...);</code> — Bị chặn bởi khóa <code>UNIQUE (lesson_id)</code> (Lỗi MySQL <code>ERROR 1062: Duplicate entry '1'</code>).</li>
+    <li><strong>Foreign Key Violation (<code>FOREIGN KEY</code>):</strong> <code>INSERT INTO lessons ... VALUES (999, 1, '2025-04-01', 'Pending');</code> — Rejected by <code>fk_lessons_student</code> (MySQL <code>ERROR 1452: Cannot add or update a child row</code>) because <code>student_id = 999</code> does not exist.</li>
+    <li><strong>Check Constraint Violation (<code>duration_minutes &lt;= 0</code>):</strong> <code>INSERT INTO lesson_reports ... VALUES (17, 'Review Data Analysis with Python', 'Good', 0, 450000.00);</code> — Rejected by <code>chk_report_duration</code> (MySQL <code>ERROR 3819: Check constraint is violated</code>).</li>
+    <li><strong>Check Constraint Violation (<code>amount &lt;= 0</code>):</strong> <code>INSERT INTO payments ... VALUES (1, -50000.00, '2025-01-15', 'Cash');</code> — Rejected by <code>chk_payment_amount</code> (MySQL <code>ERROR 3819</code>).</li>
+    <li><strong>Unique Constraint Violation (Duplicate <code>lesson_id</code>):</strong> <code>INSERT INTO lesson_reports (lesson_id, ...) VALUES (1, ...);</code> — Rejected by <code>UNIQUE (lesson_id)</code> (MySQL <code>ERROR 1062: Duplicate entry '1'</code>).</li>
   </ul>
 </div>
 
 <!-- ===================================================================== -->
-<!-- MỤC 4: GIẢI QUYẾT 10 TRUY VẤN DỮ LIỆU (PHẦN C)                         -->
+<!-- SECTION 4: 10 ANALYTICAL DATA QUERIES (PART C)                        -->
 <!-- ===================================================================== -->
 <div class="section-banner section-page-break">
-  <h1>Mục 4. Giải Quyết 10 Truy Vấn Dữ Liệu (Phần C — queries.sql)</h1>
+  <h1>Section 4. 10 Analytical Data Queries (Part C — queries.sql)</h1>
 </div>
 
 <div class="callout callout-success">
-  <div class="callout-title">Nguyên lý Kỹ thuật Trọng tâm: Chống Cộng Lặp Chi Phí (Anti-Fanout / Chasm Trap Prevention)</div>
+  <div class="callout-title">Core Technical Principle: Anti-Fanout / Chasm Trap Prevention</div>
   <p style="margin-bottom:0;">
-    Trong lược đồ <code>tutoring_mini</code>, một buổi học (<code>lessons</code>) có tối đa <strong>1</strong> báo cáo học phí (<code>lesson_reports.fee</code>), nhưng có thể có <strong>N</strong> lần thanh toán (<code>payments.amount</code>). Nếu thực hiện nối trực tiếp <code>lessons JOIN lesson_reports JOIN payments</code> rồi tính <code>SUM(lr.fee)</code> hoặc <code>AVG(lr.fee)</code>, những buổi học trả góp nhiều lần (như <code>lesson_id = 1</code> và <code>lesson_id = 6</code> có 2 lần thanh toán) sẽ làm giá trị <code>lr.fee</code> bị nhân đôi! Để triệt tiêu hoàn toàn lỗi cộng lặp này: (1) Ở các câu chỉ tính học phí (Câu 4, Câu 8, <code>v_group_summary</code>), ta chỉ nối tới <code>lesson_reports</code> mà không nối <code>payments</code>; (2) Ở báo cáo đối chiếu đồng thời cả học phí và thanh toán (như <code>v_debt</code>), ta bắt buộc <strong>gom nhóm bảng <code>payments</code> theo <code>lesson_id</code> trong Subquery trước</strong> để đưa quan hệ về 1–1 rồi mới thực hiện <code>LEFT JOIN</code>.
+    In the <code>tutoring_mini</code> schema, a lesson (<code>lessons</code>) has at most <strong>1</strong> tuition report (<code>lesson_reports.fee</code>) but can have <strong>N</strong> payment installments (<code>payments.amount</code>). Joining <code>lessons JOIN lesson_reports JOIN payments</code> directly and computing <code>SUM(lr.fee)</code> or <code>AVG(lr.fee)</code> causes multi-installment lessons (such as <code>lesson_id = 1</code> and <code>lesson_id = 6</code>, each paid in 2 installments) to duplicate <code>lr.fee</code>! To eliminate this fanout error: (1) Queries that only aggregate tuition fees (Query 4, Query 8, <code>v_group_summary</code>) join <code>lesson_reports</code> without joining <code>payments</code>; (2) Reconciliations that combine both fees and payments (such as <code>v_debt</code>) <strong>pre-aggregate <code>payments</code> by <code>lesson_id</code> inside a Subquery first</strong> to restore a 1–1 cardinality before performing the outer join.
   </p>
 </div>
 
 {''.join(queries_html_blocks)}
 
 <!-- ===================================================================== -->
-<!-- MỤC 5: XÂY DỰNG CÁC VIEW TOÀN THỜI GIAN (PHẦN D)                      -->
+<!-- SECTION 5: ALL-TIME ANALYTICAL VIEWS (PART D)                         -->
 <!-- ===================================================================== -->
 <div class="section-banner section-page-break">
-  <h1>Mục 5. Xây Dựng Các VIEW Toàn Thời Gian (Phần D — views.sql)</h1>
+  <h1>Section 5. All-Time Analytical VIEWs (Part D — views.sql)</h1>
 </div>
 
 <p>
-  Ba khung nhìn (<code>VIEW</code>) trong tệp <code>views.sql</code> được thiết kế bao quát toàn bộ thời gian (bao gồm cả dữ liệu năm 2024 và năm 2025), cung cấp giao diện truy vấn chuẩn hóa cho hệ thống báo cáo điều hành và kế toán công nợ của trung tâm:
+  The three views (<code>VIEW</code>) in <code>views.sql</code> operate across the entire historical timeline (covering both 2024 and 2025 records), providing standardized reporting interfaces for executive management and student accounts receivable:
 </p>
 
-<h2>5.1. Thiết kế và Kết quả Thực tế của <code>v_detail</code></h2>
+<h2>5.1. Design and Live Output of <code>v_detail</code></h2>
 <p>
-  <strong>Logic thiết kế:</strong> Khung nhìn <code>v_detail</code> nối trong (<code>INNER JOIN</code>) từ <code>lessons</code> sang <code>students</code>, <code>tutors</code> và <code>subjects</code> để lấy đầy đủ mã định danh kèm tên học viên, gia sư, môn học; sau đó sử dụng <code>LEFT JOIN lesson_reports</code> để giữ nguyên cả các buổi học <code>Pending</code> và <code>Cancelled</code> chưa có kết quả (cột <code>fee</code> hiển thị <code>NULL</code> đúng yêu cầu).
+  <strong>Design Logic:</strong> View <code>v_detail</code> performs an <code>INNER JOIN</code> from <code>lessons</code> to <code>students</code>, <code>tutors</code>, and <code>subjects</code> to retrieve both IDs and names for students, tutors, and subjects, followed by a <code>LEFT JOIN</code> to <code>lesson_reports</code> so that <code>Pending</code> and <code>Cancelled</code> lessons without a report are preserved (displaying <code>fee</code> as <code>NULL</code>).
 </p>
 <pre class="sql-code"><code>CREATE OR REPLACE VIEW v_detail AS
 SELECT
@@ -1508,9 +1479,9 @@ JOIN subjects sub ON t.subject_id = sub.subject_id
 LEFT JOIN lesson_reports lr ON l.lesson_id = lr.lesson_id;</code></pre>
 {tbl_v_detail}
 
-<h2>5.2. Thiết kế và Kết quả Thực tế của <code>v_group_summary</code></h2>
+<h2>5.2. Design and Live Output of <code>v_group_summary</code></h2>
 <p>
-  <strong>Logic thiết kế:</strong> Khung nhìn <code>v_group_summary</code> xuất phát từ bảng <code>subjects</code> và thực hiện chuỗi <code>LEFT JOIN</code> sang <code>tutors → lessons → lesson_reports</code>. Nhờ đó, môn học chưa từng phát sinh giao dịch (<em>Pháp luật đại cương</em>, <code>subject_id = 6</code>) vẫn được giữ lại với các chỉ số đếm và <code>total_fee = 0.00</code>. Việc không nối bảng <code>payments</code> giúp <code>SUM(lr.fee)</code> chính xác tuyệt đối, không bị cộng lặp.
+  <strong>Design Logic:</strong> View <code>v_group_summary</code> starts from <code>subjects</code> and chains <code>LEFT JOIN</code> operations through <code>tutors → lessons → lesson_reports</code>. Consequently, subjects that have never had any lessons (<em>General Law</em>, <code>subject_id = 6</code>) are retained with zero counts and <code>total_fee = 0.00</code>. Omitting the <code>payments</code> table guarantees that <code>SUM(lr.fee)</code> is free of installment fanout.
 </p>
 <pre class="sql-code"><code>CREATE OR REPLACE VIEW v_group_summary AS
 SELECT
@@ -1527,9 +1498,9 @@ LEFT JOIN lesson_reports lr ON l.lesson_id = lr.lesson_id
 GROUP BY sub.subject_id, sub.name;</code></pre>
 {tbl_v_group}
 
-<h2>5.3. Thiết kế và Kết quả Thực tế của <code>v_debt</code> (Chống Cộng Lặp Chi Phí)</h2>
+<h2>5.3. Design and Live Output of <code>v_debt</code> (Anti-Fanout Protection)</h2>
 <p>
-  <strong>Logic thiết kế:</strong> Khung nhìn <code>v_debt</code> tổng hợp công nợ cho toàn bộ 11 học viên. Để <strong>bảo đảm chi phí không bị cộng lặp</strong> khi một buổi học có nhiều lần thanh toán (như <code>lesson_id = 1</code> của Lê Hoàng Minh Khôi và <code>lesson_id = 6</code> của Nguyễn Phương Anh), ta sử dụng bảng dẫn xuất (Derived Table) <code>pay_per_lesson</code> gom nhóm <code>SUM(amount)</code> theo <code>lesson_id</code> trước khi <code>LEFT JOIN</code> với <code>lessons</code> và <code>lesson_reports</code>:
+  <strong>Design Logic:</strong> View <code>v_debt</code> summarizes tuition obligations and payments for all 11 students. To <strong>prevent tuition fee duplication</strong> when a lesson is paid across multiple installments (such as <code>lesson_id = 1</code> for Le Hoang Minh Khoi and <code>lesson_id = 6</code> for Nguyen Phuong Anh), the derived table <code>pay_per_lesson</code> pre-aggregates <code>SUM(amount)</code> grouped by <code>lesson_id</code> before left-joining with <code>lessons</code> and <code>lesson_reports</code>:
 </p>
 <pre class="sql-code"><code>CREATE OR REPLACE VIEW v_debt AS
 SELECT
@@ -1558,7 +1529,7 @@ GROUP BY s.student_id, s.full_name;</code></pre>
 </html>
 """
     HTML_OUTPUT.write_text(html_doc, encoding="utf-8")
-    print(f"Đã tạo file HTML: {HTML_OUTPUT}")
+    print(f"Generated HTML preview: {HTML_OUTPUT}")
 
     with sync_playwright() as p:
         browser = p.chromium.launch()
@@ -1571,14 +1542,14 @@ GROUP BY s.student_id, s.full_name;</code></pre>
             display_header_footer=True,
             header_template="""
             <div style="width:100%; font-size:7.5pt; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color:#64748b; padding:0 16mm; display:flex; justify-content:space-between; border-bottom:0.5px solid #cbd5e1;">
-              <span><strong>FDA - NEU</strong> | Khoa Khoa học Dữ liệu và Trí tuệ Nhân tạo</span>
-              <span>Đề 01: Quản lý Trung tâm Gia sư (tutoring_mini)</span>
+              <span><strong>FDA - NEU</strong> | Faculty of Data Science and Artificial Intelligence</span>
+              <span>Topic 01: Tutoring Center Management System (tutoring_mini)</span>
             </div>
             """,
             footer_template="""
             <div style="width:100%; font-size:7.5pt; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color:#64748b; padding:0 16mm; display:flex; justify-content:space-between; border-top:0.5px solid #cbd5e1;">
-              <span>Báo cáo Thực hành Cơ sở Dữ liệu MySQL — Đề 01 (tutoring_mini)</span>
-              <span>Trang <span class="pageNumber"></span> / <span class="totalPages"></span></span>
+              <span>MySQL Database Practical Project Report — Topic 01 (tutoring_mini)</span>
+              <span>Page <span class="pageNumber"></span> / <span class="totalPages"></span></span>
             </div>
             """,
         )
@@ -1586,7 +1557,7 @@ GROUP BY s.student_id, s.full_name;</code></pre>
 
     if HTML_OUTPUT.exists():
         HTML_OUTPUT.unlink()
-    print(f"Đã kết xuất thành công PDF: {PDF_OUTPUT} ({PDF_OUTPUT.stat().st_size / 1024:.1f} KB)")
+    print(f"Successfully rendered PDF: {PDF_OUTPUT} ({PDF_OUTPUT.stat().st_size / 1024:.1f} KB)")
 
 
 if __name__ == "__main__":
