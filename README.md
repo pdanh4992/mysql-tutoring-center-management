@@ -2,6 +2,7 @@
 
 > **National Economics University (NEU)**  
 > **Faculty of Data Science and Artificial Intelligence (FDA)**  
+> **Instructor:** Dr. Tran Duc Minh  
 > **MySQL Database Practical Project Report**
 
 ---

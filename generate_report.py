@@ -853,6 +853,24 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
   .cover-meta {{
     margin-top: 6px;
   }}
+  .instructor-line {{
+    font-size: 10.5pt;
+    font-weight: 700;
+    color: #0f172a;
+    text-align: center;
+    margin: 0 0 12px 0;
+    padding: 6px 14px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 6px;
+  }}
+  .instructor-line span {{
+    color: #1e3a8a;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-right: 6px;
+  }}
   .meta-member-title {{
     font-size: 10pt;
     font-weight: 800;
@@ -1194,6 +1212,9 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
     </div>
 
     <div class="cover-meta">
+      <div class="instructor-line">
+        <span>Instructor:</span> Dr. Tran Duc Minh
+      </div>
       <div class="meta-member-title">PROJECT TEAM MEMBERS</div>
       <table class="member-table">
         <thead>
