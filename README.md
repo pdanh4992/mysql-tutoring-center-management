@@ -92,6 +92,5 @@ python3 generate_report.py
 | STT | Họ và Tên | Mã Sinh viên | Đơn vị |
 |:---:|---|---|---|
 | 1 | **Phạm Ngọc Danh** | `11251809` | Khoa KHDL & TTNT (FDA - NEU) |
-| 2 | **Nguyễn Trịnh Anh Tuấn** | `11258690` | Khoa KHDL & TTNT (FDA - NEU) |
-| 3 | **Cao Đình Bình** | `11251272` | Khoa KHDL & TTNT (FDA - NEU) |
-| 4 | **Hoàng Anh Tú** | `11258581` | Khoa KHDL & TTNT (FDA - NEU) |
+| 2 | **Nguyễn Mạnh Dũng** | `11252140` | Khoa KHDL & TTNT (FDA - NEU) |
+| 3 | **Hoàng Đức Dương** | `11252228` | Khoa KHDL & TTNT (FDA - NEU) |

@@ -1,62 +1,48 @@
--- ============================================================================
--- ĐỀ 01: QUẢN LÝ TRUNG TÂM GIA SƯ (tutoring_mini)
--- Tệp 2: seed.sql - Nạp dữ liệu mẫu & Truy vấn kiểm chứng toàn vẹn dữ liệu
--- ============================================================================
-
 USE tutoring_mini;
 
--- ----------------------------------------------------------------------------
 -- 1. Nạp dữ liệu bảng subjects (6 môn học >= 5)
 -- Lưu ý:
---   - Môn 5 (Kinh tế vi mô): chỉ có buổi học năm 2024 -> không có giao dịch Quý I/2025
---   - Môn 6 (Hóa học đại cương): chưa từng có giao dịch nào toàn thời gian
--- ----------------------------------------------------------------------------
+--   - Môn 5 (Kinh tế vĩ mô 1): chỉ có buổi học năm 2024 -> không có giao dịch Quý I/2025
+--   - Môn 6 (Pháp luật đại cương): chưa từng có giao dịch nào toàn thời gian
 INSERT INTO subjects (subject_id, name) VALUES
-(1, 'Toán cao cấp & Đại số tuyến tính'),
-(2, 'Lập trình Python & Khoa học dữ liệu'),
-(3, 'Tiếng Anh học thuật (IELTS)'),
-(4, 'Vật lý đại cương'),
-(5, 'Kinh tế vi mô'),
-(6, 'Hóa học đại cương');
+(1, 'Phân tích dữ liệu với Python'),
+(2, 'Cấu trúc dữ liệu và giải thuật với Python'),
+(3, 'Nhập môn cơ sở dữ liệu'),
+(4, 'Nhập môn Trí tuệ nhân tạo'),
+(5, 'Kinh tế vĩ mô 1'),
+(6, 'Pháp luật đại cương');
 
--- ----------------------------------------------------------------------------
--- 2. Nạp dữ liệu bảng tutors (7 gia sư >= 6)
+-- 2. Nạp dữ liệu bảng tutors (6 gia sư >= 6)
 -- Lưu ý:
---   - Gia sư 6 (TS. Đặng Văn Khoa): chỉ dạy năm 2024, chưa có giao dịch năm 2025
---   - Gia sư 7 (ThS. Bùi Thanh Tùng): chưa từng có giao dịch nào
--- ----------------------------------------------------------------------------
+--   - Gia sư 6 (ThS. Phạm Đức Chung): chỉ dạy năm 2024, chưa có giao dịch năm 2025
 INSERT INTO tutors (tutor_id, full_name, email, qualification, subject_id) VALUES
-(1, 'TS. Nguyễn Minh Hoàng', 'hoang.nm@tutoring.edu.vn', 'Tiến sĩ Toán ứng dụng', 1),
-(2, 'ThS. Trần Thu Hà', 'ha.tt@tutoring.edu.vn', 'Thạc sĩ Khoa học Dữ liệu & AI', 2),
-(3, 'ThS. Lê Quốc Bảo', 'bao.lq@tutoring.edu.vn', 'Thạc sĩ TESOL - IELTS 8.5', 3),
-(4, 'CN. Phạm Quang Huy', 'huy.pq@tutoring.edu.vn', 'Cử nhân Sư phạm Toán xuất sắc', 1),
-(5, 'ThS. Vũ Thị Mai Anh', 'maianh.vt@tutoring.edu.vn', 'Thạc sĩ Vật lý lý thuyết', 4),
-(6, 'TS. Đặng Văn Khoa', 'khoa.dv@tutoring.edu.vn', 'Tiến sĩ Kinh tế học', 5),
-(7, 'ThS. Bùi Thanh Tùng', 'tung.bt@tutoring.edu.vn', 'Thạc sĩ Hóa hữu cơ', 6);
+(1, 'TS. Trần Hùng', 'hung.tran@neu.edu.vn', 'Tiến sĩ Khoa học Dữ liệu', 1),
+(2, 'TS. Vũ Đức Minh', 'minhvd@neu.edu.vn', 'Tiến sĩ Khoa học Máy tính', 2),
+(3, 'TS. Trần Đức Minh', 'minhdt@neu.edu.vn', 'Tiến sĩ Hệ thống Thông tin', 3),
+(4, 'TS. Nguyễn Trọng Nghĩa', 'nghiant@neu.edu.vn', 'Tiến sĩ Trí tuệ Nhân tạo', 4),
+(5, 'TS. Nguyễn Phúc Hải', 'hainp@neu.edu.vn', 'Tiến sĩ Khoa học Dữ liệu & AI', 1),
+(6, 'ThS. Phạm Đức Chung', 'chungpd@neu.edu.vn', 'Thạc sĩ Kinh tế học', 5);
 
--- ----------------------------------------------------------------------------
 -- 3. Nạp dữ liệu bảng students (11 học viên >= 10)
 -- Lưu ý:
---   - Học viên 1 (Phạm Ngọc Danh): 5 buổi Completed trong năm 2025 (> 3 buổi)
---   - Học viên 2 (Nguyễn Trịnh Anh Tuấn): 4 buổi Completed trong năm 2025 (> 3 buổi)
---   - Học viên 7 (Đỗ Thùy Linh): có giao dịch Completed & Pending nhưng chưa thanh toán lần nào
---   - Học viên 8 (Vũ Hoàng Nam): có giao dịch Pending & Cancelled nhưng chưa thanh toán lần nào
---   - Học viên 10 (Bùi Quốc Khánh) & 11 (Đinh Mai Phương): chưa từng có buổi học nào
--- ----------------------------------------------------------------------------
+--   - Học viên 1 (Lê Hoàng Minh Khôi): 5 buổi Completed trong năm 2025 (> 3 buổi)
+--   - Học viên 2 (Nguyễn Phương Anh): 4 buổi Completed trong năm 2025 (> 3 buổi)
+--   - Học viên 7 (Vũ Ngọc Hà): có giao dịch Completed & Pending nhưng chưa thanh toán lần nào
+--   - Học viên 8 (Bùi Đức Thịnh): có giao dịch Pending & Cancelled nhưng chưa thanh toán lần nào
+--   - Học viên 10 (Ngô Hải Đăng) & 11 (Lý Thanh Trúc): chưa từng có buổi học nào
 INSERT INTO students (student_id, full_name, dob, phone) VALUES
-(1, 'Phạm Ngọc Danh', '2006-05-14', '0912345101'),
-(2, 'Nguyễn Trịnh Anh Tuấn', '2006-08-22', '0912345102'),
-(3, 'Cao Đình Bình', '2006-02-10', '0912345103'),
-(4, 'Hoàng Anh Tú', '2006-11-03', '0912345104'),
-(5, 'Lê Thị Hồng Nhung', '2005-07-19', '0912345105'),
-(6, 'Trần Minh Đức', '2005-12-25', '0912345106'),
-(7, 'Đỗ Thùy Linh', '2006-04-30', '0912345107'),
-(8, 'Vũ Hoàng Nam', '2006-09-15', '0912345108'),
-(9, 'Ngô Phương Thảo', '2005-03-08', '0912345109'),
-(10, 'Bùi Quốc Khánh', '2007-01-20', '0912345110'),
-(11, 'Đinh Mai Phương', '2007-06-12', '0912345111');
+(1, 'Lê Hoàng Minh Khôi', '2006-03-15', '0912345101'),
+(2, 'Nguyễn Phương Anh', '2006-07-22', '0912345102'),
+(3, 'Trần Quốc Tuấn', '2006-01-10', '0912345103'),
+(4, 'Phạm Gia Bảo', '2006-11-05', '0912345104'),
+(5, 'Hoàng Mai Linh', '2005-08-19', '0912345105'),
+(6, 'Đặng Tuấn Kiệt', '2005-12-25', '0912345106'),
+(7, 'Vũ Ngọc Hà', '2006-04-30', '0912345107'),
+(8, 'Bùi Đức Thịnh', '2006-09-12', '0912345108'),
+(9, 'Đỗ Khánh Huyền', '2005-05-08', '0912345109'),
+(10, 'Ngô Hải Đăng', '2007-02-18', '0912345110'),
+(11, 'Lý Thanh Trúc', '2007-06-20', '0912345111');
 
--- ----------------------------------------------------------------------------
 -- 4. Nạp dữ liệu bảng lessons (23 buổi học >= 12)
 -- Bao phủ:
 --   - Tháng 01/2025 (buổi 1, 2, 6, 10, 22)
@@ -64,7 +50,6 @@ INSERT INTO students (student_id, full_name, dob, phone) VALUES
 --   - Ngoài Quý I/2025: tháng 05, 06/2025 (buổi 5, 9, 13, 18)
 --   - Ngoài năm 2025: năm 2024 (buổi 14, 16)
 --   - Đủ 3 trạng thái: 16 Completed (1..16), 4 Pending (17..20), 3 Cancelled (21..23)
--- ----------------------------------------------------------------------------
 INSERT INTO lessons (lesson_id, student_id, tutor_id, lesson_date, status) VALUES
 -- Nhóm 16 buổi học Completed (lesson_id 1 -> 16)
 (1,  1, 1, '2025-01-08', 'Completed'),
@@ -95,38 +80,34 @@ INSERT INTO lessons (lesson_id, student_id, tutor_id, lesson_date, status) VALUE
 (22, 8, 3, '2025-01-29', 'Cancelled'),
 (23, 3, 5, '2025-03-15', 'Cancelled');
 
--- ----------------------------------------------------------------------------
 -- 5. Nạp dữ liệu bảng lesson_reports (16 báo cáo >= 10)
--- Quy tắc 1-1: Đúng 16 buổi Completed (lesson_id 1..16) có báo cáo kết quả
--- ----------------------------------------------------------------------------
+-- Quy tắc 1-1: Đúng 16 buổi Completed (lesson_id 1..16) có báo cáo kết quả theo đúng môn học
 INSERT INTO lesson_reports (report_id, lesson_id, content, feedback, duration_minutes, fee) VALUES
-(1,  1,  'Ma trận nghịch đảo và hệ phương trình tuyến tính Cramer', 'Học viên nắm vững thuật toán khử Gauss', 90, 500000.00),
-(2,  2,  'Cấu trúc dữ liệu List, Dict và xử lý bảng với Pandas', 'Viết code sạch, tư duy vector hóa tốt', 120, 600000.00),
-(3,  3,  'Không gian vector, cơ sở và số chiều', 'Giải tốt bài tập tự luận, cần rèn thêm tốc độ', 90, 500000.00),
-(4,  4,  'Trực quan hóa dữ liệu với Matplotlib & Seaborn', 'Hoàn thành xuất sắc mini-project phân tích dữ liệu', 120, 600000.00),
-(5,  5,  'IELTS Writing Task 2: Phân tích dạng bài Opinion Essay', 'Bố cục đoạn văn mạch lạc, từ vựng học thuật phong phú', 90, 550000.00),
-(6,  6,  'Giá trị riêng, vector riêng và chéo hóa ma trận', 'Hiểu bản chất toán học, làm đúng 90% bài tập', 90, 500000.00),
-(7,  7,  'IELTS Speaking Part 2 & 3: Chủ đề Technology & Education', 'Phát âm rõ ràng, phản xạ trả lời tự nhiên', 90, 550000.00),
-(8,  8,  'Truy vấn SQL nâng cao và kết nối Python - MySQL', 'Nắm chắc kỹ thuật JOIN, GROUP BY và CTE', 120, 600000.00),
-(9,  9,  'Tích phân suy rộng và chuỗi số hội tụ', 'Tư duy logic tốt, trình bày lời giải chặt chẽ', 90, 450000.00),
-(10, 10, 'Đạo hàm riêng và cực trị hàm nhiều biến', 'Cần chú ý điều kiện đủ của cực trị tự do', 90, 500000.00),
-(11, 11, 'Động lực học chất điểm và định luật bảo toàn cơ năng', 'Vận dụng công thức chính xác vào bài toán thực tế', 90, 480000.00),
-(12, 12, 'IELTS Reading: Kỹ thuật Skimming & Scanning nâng cao', 'Tăng điểm từ 6.5 lên 7.5 trong bài thi thử', 90, 550000.00),
-(13, 13, 'Học máy cơ bản: Hồi quy tuyến tính với Scikit-learn', 'Hiểu rõ hàm mất mát MSE và cách đánh giá mô hình', 120, 600000.00),
-(14, 14, 'Cung - Cầu thị trường và độ co giãn của cầu theo giá', 'Phân tích đồ thị kinh tế vi mô rất sắc bén', 90, 400000.00),
-(15, 15, 'Phương trình vi phân cấp 1 và cấp 2 hệ số hằng', 'Tiếp thu nhanh, hoàn thành đầy đủ bài tập về nhà', 90, 450000.00),
-(16, 16, 'Lý thuyết hành vi người tiêu dùng và tối đa hóa lợi ích', 'Nắm vững đường bàng quan và đường ngân sách', 90, 400000.00);
+(1,  1,  'Xử lý mảng đa chiều NumPy và thao tác DataFrame với Pandas', 'Học viên nắm vững kỹ thuật slicing và vector hóa dữ liệu', 90, 500000.00),
+(2,  2,  'Phân tích độ phức tạp thuật toán Big-O, Danh sách liên kết (Linked List)', 'Cài đặt thành thạo Singly & Doubly Linked List trên Python', 120, 600000.00),
+(3,  3,  'Làm sạch dữ liệu (Data Cleaning) và xử lý giá trị khuyết thiếu', 'Áp dụng tốt các kỹ thuật nội suy và lọc nhiễu thực tế', 90, 500000.00),
+(4,  4,  'Cấu trúc dữ liệu Ngăn xếp (Stack), Hàng đợi (Queue) và Đệ quy', 'Giải quyết tốt bài toán duyệt biểu thức hậu tố và quay lui', 120, 600000.00),
+(5,  5,  'Thiết kế sơ đồ thực thể kết hợp (ERD) và ánh xạ sang mô hình quan hệ', 'Xác định đúng khóa chính, khóa ngoại và bản số quan hệ', 90, 550000.00),
+(6,  6,  'Phân tích khám phá dữ liệu (EDA) và thống kê mô tả với Python', 'Biết cách tổng hợp dữ liệu bằng groupby và pivot_table', 90, 500000.00),
+(7,  7,  'Chuẩn hóa cơ sở dữ liệu (1NF, 2NF, 3NF, BCNF) và phụ thuộc hàm', 'Nắm chắc thuật toán tìm bao đóng và tách bảng bảo toàn thông tin', 90, 550000.00),
+(8,  8,  'Cây nhị phân tìm kiếm (BST) và các thuật toán duyệt cây (Inorder, Preorder)', 'Viết code đệ quy rõ ràng, hiểu sâu cơ chế cân bằng cây', 120, 600000.00),
+(9,  9,  'Chiến lược tìm kiếm mù (BFS, DFS) và biểu diễn không gian trạng thái', 'Mô hình hóa chính xác bài toán tìm đường trên lưới 2D', 90, 450000.00),
+(10, 10, 'Trực quan hóa dữ liệu chuyên sâu với Matplotlib và Seaborn', 'Thiết kế biểu đồ phân phối và tương quan rất trực quan', 90, 500000.00),
+(11, 11, 'Kỹ thuật biến đổi đặc trưng (Feature Engineering) và chuẩn hóa dữ liệu', 'Thực hành tốt MinMaxScaler và StandardScaler trên bộ dữ liệu mẫu', 90, 480000.00),
+(12, 12, 'Truy vấn SQL nâng cao: INNER/LEFT JOIN, GROUP BY, HAVING và Subquery', 'Viết câu lệnh truy vấn tối ưu, chống cộng lặp chi phí chuẩn xác', 90, 550000.00),
+(13, 13, 'Thuật toán sắp xếp nhanh (QuickSort, MergeSort) và Quy hoạch động', 'Tối ưu tốt bộ nhớ và thời gian chạy trên tập dữ liệu lớn', 120, 600000.00),
+(14, 14, 'Đo lường sản lượng quốc gia (GDP), chỉ số giá tiêu dùng (CPI) và lạm phát', 'Phân biệt rõ GDP danh nghĩa, GDP thực tế và tốc độ tăng trưởng', 90, 400000.00),
+(15, 15, 'Tìm kiếm có thông tin (Greedy Best-First Search, A*) và hàm Heuristic', 'Chứng minh chặt chẽ tính Admissible và Consistent của hàm Manhattan', 90, 450000.00),
+(16, 16, 'Mô hình Tổng cầu - Tổng cung (AD-AS) và chính sách tài khóa, tiền tệ', 'Phân tích sắc bén tác động của lãi suất và chi tiêu công tới cân bằng vĩ mô', 90, 400000.00);
 
--- ----------------------------------------------------------------------------
 -- 6. Nạp dữ liệu bảng payments (17 giao dịch thanh toán >= 10)
 -- Bao phủ:
 --   - Giao dịch trả nhiều lần:
 --       + lesson_id = 1: trả 2 lần (300,000 + 200,000 = 500,000 -> trả đủ)
 --       + lesson_id = 6: trả 2 lần (200,000 + 150,000 = 350,000 < 500,000 -> còn nợ 150,000)
 --   - Giao dịch còn nợ một phần: lesson_id = 6 (nợ 150k), lesson_id = 10 (nợ 200k), lesson_id = 13 (nợ 200k)
---   - Giao dịch Completed chưa trả lần nào: lesson_id = 15 (Đỗ Thùy Linh - nợ 450,000)
+--   - Giao dịch Completed chưa trả lần nào: lesson_id = 15 (Vũ Ngọc Hà - nợ 450,000)
 --   - Thanh toán năm 2024: lesson_id = 14, 16 (ngoài năm 2025)
--- ----------------------------------------------------------------------------
 INSERT INTO payments (payment_id, lesson_id, amount, payment_date, method) VALUES
 (1,  1,  300000.00, '2025-01-08', 'Cash'),
 (2,  1,  200000.00, '2025-01-12', 'BankTransfer'),
@@ -151,7 +132,6 @@ INSERT INTO payments (payment_id, lesson_id, amount, payment_date, method) VALUE
 -- ============================================================================
 
 -- Kiểm chứng 1A: Đối chiếu số lượng buổi học theo trạng thái và số báo cáo tương ứng
--- Kỳ vọng: Completed có total_lessons = total_reports = 16; Pending và Cancelled có total_reports = 0
 SELECT
     l.status,
     COUNT(l.lesson_id) AS total_lessons,
@@ -161,7 +141,6 @@ LEFT JOIN lesson_reports lr ON l.lesson_id = lr.lesson_id
 GROUP BY l.status;
 
 -- Kiểm chứng 1B: Tìm các bản ghi bất thường (Completed nhưng thiếu report, hoặc chưa Completed nhưng có report)
--- Kỳ vọng: Trả về 0 dòng (tập rỗng)
 SELECT
     l.lesson_id,
     l.status,
@@ -172,7 +151,6 @@ WHERE (l.status = 'Completed' AND lr.report_id IS NULL)
    OR (l.status <> 'Completed' AND lr.report_id IS NOT NULL);
 
 -- Kiểm chứng 2A: Đối chiếu tổng tiền thu trong payments với học phí fee trong lesson_reports
--- Kỳ vọng: Cột is_valid = 'HOP_LE' cho toàn bộ các buổi học, remaining_debt >= 0
 SELECT
     lr.lesson_id,
     l.status,
@@ -190,7 +168,6 @@ GROUP BY lr.lesson_id, l.status, lr.fee
 ORDER BY lr.lesson_id;
 
 -- Kiểm chứng 2B: Tìm các giao dịch thanh toán vi phạm (thu tiền khi chưa có lesson_reports hoặc tổng thu > fee)
--- Kỳ vọng: Trả về 0 dòng (tập rỗng)
 SELECT
     p.lesson_id,
     SUM(p.amount) AS total_paid,
@@ -211,7 +188,7 @@ HAVING lr.fee IS NULL OR SUM(p.amount) > lr.fee;
 
 -- 2. Minh họa vi phạm CHECK (duration_minutes <= 0): Thời lượng buổi học bằng 0 hoặc âm
 -- INSERT INTO lesson_reports (lesson_id, content, feedback, duration_minutes, fee)
--- VALUES (17, 'Ôn tập Vật lý', 'Tốt', 0, 450000.00);
+-- VALUES (17, 'Ôn tập Phân tích dữ liệu với Python', 'Tốt', 0, 450000.00);
 -- -> Lỗi MySQL: ERROR 3819 (HY000): Check constraint 'chk_report_duration' is violated.
 
 -- 3. Minh họa vi phạm CHECK (amount <= 0): Số tiền thanh toán bằng 0 hoặc âm

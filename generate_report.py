@@ -8,7 +8,6 @@ Báo cáo học thuật chuyên nghiệp: Bao_cao_De_01.pdf
 
 import base64
 import html
-import os
 import subprocess
 import time
 from pathlib import Path
@@ -189,121 +188,128 @@ def render_table(headers, rows, caption=None, compact=False):
 
 
 def build_erd_svg() -> str:
-    """Dựng sơ đồ quan hệ thực thể (ERD) dạng Vector SVG sắc nét."""
+    """Dựng sơ đồ quan hệ thực thể (ERD) dạng Vector SVG cân đối, rõ nét, không tràn chữ."""
     return """
     <div class="erd-container">
-      <svg viewBox="0 0 920 420" xmlns="http://www.w3.org/2000/svg" class="erd-svg">
+      <svg viewBox="0 0 960 430" xmlns="http://www.w3.org/2000/svg" class="erd-svg">
         <defs>
-          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
             <path d="M 0 1 L 10 5 L 0 9 z" fill="#1e3a8a"/>
           </marker>
+          <marker id="arrow-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#047857"/>
+          </marker>
+          <marker id="arrow-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M 0 1 L 10 5 L 0 9 z" fill="#b45309"/>
+          </marker>
           <filter id="shadow" x="-4%" y="-4%" width="108%" height="110%">
-            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.10"/>
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#0f172a" flood-opacity="0.08"/>
           </filter>
         </defs>
 
-        <!-- Background Grid -->
-        <rect x="2" y="2" width="916" height="416" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
+        <!-- Background Box -->
+        <rect x="2" y="2" width="956" height="426" rx="10" fill="#f8fafc" stroke="#cbd5e1" stroke-width="1.5"/>
 
         <!-- Relationship Connector Lines -->
-        <!-- subjects (1) -> (N) tutors -->
-        <path d="M 240 95 L 335 95" stroke="#1e3a8a" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-        <text x="252" y="87" font-size="11" font-weight="bold" fill="#1e40af">1</text>
-        <text x="318" y="87" font-size="11" font-weight="bold" fill="#1e40af">N</text>
+        <!-- 1. subjects (1) -> (N) 2. tutors -->
+        <path d="M 245 95 L 330 95" stroke="#1e3a8a" stroke-width="2" fill="none" marker-end="url(#arrow-blue)"/>
+        <text x="255" y="87" font-size="11" font-weight="bold" fill="#1e40af">1</text>
+        <text x="312" y="87" font-size="11" font-weight="bold" fill="#1e40af">N</text>
 
-        <!-- tutors (1) -> (N) lessons -->
-        <path d="M 460 165 L 460 225" stroke="#1e3a8a" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-        <text x="468" y="182" font-size="11" font-weight="bold" fill="#1e40af">1</text>
-        <text x="468" y="218" font-size="11" font-weight="bold" fill="#1e40af">N</text>
+        <!-- 2. tutors (1) -> (N) 4. lessons -->
+        <path d="M 465 170 L 465 225" stroke="#1e3a8a" stroke-width="2" fill="none" marker-end="url(#arrow-blue)"/>
+        <text x="474" y="186" font-size="11" font-weight="bold" fill="#1e40af">1</text>
+        <text x="474" y="218" font-size="11" font-weight="bold" fill="#1e40af">N</text>
 
-        <!-- students (1) -> (N) lessons -->
-        <path d="M 240 305 L 335 305" stroke="#1e3a8a" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
-        <text x="252" y="297" font-size="11" font-weight="bold" fill="#1e40af">1</text>
-        <text x="318" y="297" font-size="11" font-weight="bold" fill="#1e40af">N</text>
+        <!-- 3. students (1) -> (N) 4. lessons -->
+        <path d="M 245 305 L 330 305" stroke="#1e3a8a" stroke-width="2" fill="none" marker-end="url(#arrow-blue)"/>
+        <text x="255" y="297" font-size="11" font-weight="bold" fill="#1e40af">1</text>
+        <text x="312" y="297" font-size="11" font-weight="bold" fill="#1e40af">N</text>
 
-        <!-- lessons (1) -> (0..1) lesson_reports -->
-        <path d="M 585 265 L 650 265 L 650 115 L 680 115" stroke="#047857" stroke-width="2.2" fill="none" marker-end="url(#arrow)"/>
-        <text x="595" y="257" font-size="11" font-weight="bold" fill="#047857">1</text>
-        <text x="642" y="105" font-size="11" font-weight="bold" fill="#047857">0..1 (UNIQUE)</text>
+        <!-- 4. lessons (1) -> (0..1) 5. lesson_reports -->
+        <path d="M 600 265 L 638 265 L 638 110 L 695 110" stroke="#047857" stroke-width="2.2" fill="none" marker-end="url(#arrow-green)"/>
+        <text x="610" y="257" font-size="11" font-weight="bold" fill="#047857">1</text>
+        <rect x="612" y="78" width="76" height="18" rx="4" fill="#ecfdf5" stroke="#6ee7b7" stroke-width="1"/>
+        <text x="650" y="90" text-anchor="middle" font-size="10" font-weight="bold" fill="#047857">0..1 (1-1)</text>
 
-        <!-- lessons (1) -> (0..N) payments -->
-        <path d="M 585 320 L 680 320" stroke="#b45309" stroke-width="2.2" fill="none" marker-end="url(#arrow)"/>
-        <text x="595" y="312" font-size="11" font-weight="bold" fill="#b45309">1</text>
-        <text x="655" y="312" font-size="11" font-weight="bold" fill="#b45309">0..N</text>
+        <!-- 4. lessons (1) -> (0..N) 6. payments -->
+        <path d="M 600 320 L 695 320" stroke="#b45309" stroke-width="2.2" fill="none" marker-end="url(#arrow-amber)"/>
+        <text x="610" y="312" font-size="11" font-weight="bold" fill="#b45309">1</text>
+        <text x="660" y="312" font-size="11" font-weight="bold" fill="#b45309">0..N</text>
 
         <!-- TABLE 1: subjects -->
         <g filter="url(#shadow)">
-          <rect x="25" y="40" width="215" height="105" rx="6" fill="#ffffff" stroke="#1e3a8a" stroke-width="1.5"/>
-          <rect x="25" y="40" width="215" height="28" rx="6" fill="#1e3a8a"/>
-          <text x="132" y="59" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="13">1. subjects</text>
-          <text x="37" y="88" font-size="11.5" fill="#0f172a"><tspan font-weight="bold" fill="#b91c1c">PK</tspan>  subject_id : INT</text>
-          <text x="37" y="112" font-size="11.5" fill="#0f172a"><tspan font-weight="bold" fill="#0369a1">UQ</tspan>  name : VARCHAR(100)</text>
-          <text x="37" y="133" font-size="10" fill="#64748b" font-style="italic">NOT NULL UNIQUE</text>
+          <rect x="20" y="40" width="225" height="105" rx="6" fill="#ffffff" stroke="#1e3a8a" stroke-width="1.5"/>
+          <rect x="20" y="40" width="225" height="28" rx="6" fill="#1e3a8a"/>
+          <text x="132" y="59" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="12.5">1. subjects</text>
+          <text x="32" y="88" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#b91c1c">PK</tspan>  subject_id : INT</text>
+          <text x="32" y="112" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#0369a1">UQ</tspan>  name : VARCHAR(100)</text>
+          <text x="32" y="132" font-size="9.5" fill="#64748b" font-style="italic">NOT NULL UNIQUE</text>
         </g>
 
         <!-- TABLE 2: tutors -->
         <g filter="url(#shadow)">
-          <rect x="335" y="25" width="250" height="140" rx="6" fill="#ffffff" stroke="#1e3a8a" stroke-width="1.5"/>
-          <rect x="335" y="25" width="250" height="28" rx="6" fill="#1e3a8a"/>
-          <text x="460" y="44" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="13">2. tutors</text>
-          <text x="347" y="72" font-size="11.5" fill="#0f172a"><tspan font-weight="bold" fill="#b91c1c">PK</tspan>  tutor_id : INT</text>
-          <text x="347" y="92" font-size="11.5" fill="#0f172a">     full_name : VARCHAR(100)</text>
-          <text x="347" y="112" font-size="11.5" fill="#0f172a"><tspan font-weight="bold" fill="#0369a1">UQ</tspan>  email : VARCHAR(150)</text>
-          <text x="347" y="132" font-size="11.5" fill="#0f172a">     qualification : VARCHAR(150)</text>
-          <text x="347" y="152" font-size="11.5" fill="#0f172a"><tspan font-weight="bold" fill="#7c3aed">FK</tspan>  subject_id : INT</text>
+          <rect x="330" y="25" width="270" height="145" rx="6" fill="#ffffff" stroke="#1e3a8a" stroke-width="1.5"/>
+          <rect x="330" y="25" width="270" height="28" rx="6" fill="#1e3a8a"/>
+          <text x="465" y="44" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="12.5">2. tutors</text>
+          <text x="342" y="72" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#b91c1c">PK</tspan>  tutor_id : INT</text>
+          <text x="342" y="93" font-size="11" fill="#0f172a">     full_name : VARCHAR(100) NOT NULL</text>
+          <text x="342" y="114" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#0369a1">UQ</tspan>  email : VARCHAR(150) NOT NULL</text>
+          <text x="342" y="135" font-size="11" fill="#0f172a">     qualification : VARCHAR(150) NOT NULL</text>
+          <text x="342" y="156" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#7c3aed">FK</tspan>  subject_id : INT NOT NULL</text>
         </g>
 
         <!-- TABLE 3: students -->
         <g filter="url(#shadow)">
-          <rect x="25" y="230" width="215" height="135" rx="6" fill="#ffffff" stroke="#1e3a8a" stroke-width="1.5"/>
-          <rect x="25" y="230" width="215" height="28" rx="6" fill="#1e3a8a"/>
-          <text x="132" y="249" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="13">3. students</text>
-          <text x="37" y="278" font-size="11.5" fill="#0f172a"><tspan font-weight="bold" fill="#b91c1c">PK</tspan>  student_id : INT</text>
-          <text x="37" y="300" font-size="11.5" fill="#0f172a">     full_name : VARCHAR(100)</text>
-          <text x="37" y="322" font-size="11.5" fill="#0f172a">     dob : DATE</text>
-          <text x="37" y="344" font-size="11.5" fill="#0f172a">     phone : VARCHAR(20)</text>
+          <rect x="20" y="230" width="225" height="140" rx="6" fill="#ffffff" stroke="#1e3a8a" stroke-width="1.5"/>
+          <rect x="20" y="230" width="225" height="28" rx="6" fill="#1e3a8a"/>
+          <text x="132" y="249" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="12.5">3. students</text>
+          <text x="32" y="278" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#b91c1c">PK</tspan>  student_id : INT</text>
+          <text x="32" y="301" font-size="11" fill="#0f172a">     full_name : VARCHAR(100) NOT NULL</text>
+          <text x="32" y="324" font-size="11" fill="#0f172a">     dob : DATE NOT NULL</text>
+          <text x="32" y="347" font-size="11" fill="#0f172a">     phone : VARCHAR(20) NOT NULL</text>
         </g>
 
         <!-- TABLE 4: lessons -->
         <g filter="url(#shadow)">
-          <rect x="335" y="225" width="250" height="145" rx="6" fill="#ffffff" stroke="#1e40af" stroke-width="2"/>
-          <rect x="335" y="225" width="250" height="28" rx="6" fill="#1e40af"/>
-          <text x="460" y="244" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="13">4. lessons (Bảng Trung tâm)</text>
-          <text x="347" y="272" font-size="11.5" fill="#0f172a"><tspan font-weight="bold" fill="#b91c1c">PK</tspan>  lesson_id : INT</text>
-          <text x="347" y="292" font-size="11.5" fill="#0f172a"><tspan font-weight="bold" fill="#7c3aed">FK</tspan>  student_id : INT</text>
-          <text x="347" y="312" font-size="11.5" fill="#0f172a"><tspan font-weight="bold" fill="#7c3aed">FK</tspan>  tutor_id : INT</text>
-          <text x="347" y="332" font-size="11.5" fill="#0f172a">     lesson_date : DATE</text>
-          <text x="347" y="352" font-size="11.5" fill="#0f172a">     status : ENUM(3 giá trị)</text>
+          <rect x="330" y="225" width="270" height="150" rx="6" fill="#ffffff" stroke="#1e40af" stroke-width="2"/>
+          <rect x="330" y="225" width="270" height="28" rx="6" fill="#1e40af"/>
+          <text x="465" y="244" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="12.5">4. lessons (Bảng Trung tâm)</text>
+          <text x="342" y="272" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#b91c1c">PK</tspan>  lesson_id : INT</text>
+          <text x="342" y="293" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#7c3aed">FK</tspan>  student_id : INT NOT NULL</text>
+          <text x="342" y="314" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#7c3aed">FK</tspan>  tutor_id : INT NOT NULL</text>
+          <text x="342" y="335" font-size="11" fill="#0f172a">     lesson_date : DATE NOT NULL</text>
+          <text x="342" y="356" font-size="11" fill="#0f172a">     status : ENUM('Pending','Completed','Cancelled')</text>
         </g>
 
         <!-- TABLE 5: lesson_reports -->
         <g filter="url(#shadow)">
-          <rect x="680" y="25" width="218" height="160" rx="6" fill="#ffffff" stroke="#047857" stroke-width="1.8"/>
-          <rect x="680" y="25" width="218" height="28" rx="6" fill="#047857"/>
-          <text x="789" y="44" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="13">5. lesson_reports (1-1)</text>
-          <text x="690" y="70" font-size="11.5" fill="#0f172a"><tspan font-weight="bold" fill="#b91c1c">PK</tspan>  report_id : INT</text>
-          <text x="690" y="90" font-size="11.5" fill="#0f172a"><tspan font-weight="bold" fill="#047857">FK,UQ</tspan> lesson_id : INT</text>
-          <text x="690" y="110" font-size="11.5" fill="#0f172a">     content : TEXT</text>
-          <text x="690" y="130" font-size="11.5" fill="#0f172a">     feedback : TEXT</text>
-          <text x="690" y="150" font-size="11.5" fill="#0f172a"><tspan font-weight="bold" fill="#b45309">CK</tspan>  duration_minutes &gt; 0</text>
-          <text x="690" y="170" font-size="11.5" fill="#0f172a"><tspan font-weight="bold" fill="#b45309">CK</tspan>  fee DECIMAL(12,2) &gt;= 0</text>
+          <rect x="695" y="25" width="245" height="165" rx="6" fill="#ffffff" stroke="#047857" stroke-width="1.8"/>
+          <rect x="695" y="25" width="245" height="28" rx="6" fill="#047857"/>
+          <text x="817" y="44" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="12.5">5. lesson_reports (Quan hệ 1-1)</text>
+          <text x="706" y="70" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#b91c1c">PK</tspan>  report_id : INT</text>
+          <text x="706" y="91" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#047857">FK,UQ</tspan> lesson_id : INT NOT NULL UNIQUE</text>
+          <text x="706" y="112" font-size="11" fill="#0f172a">     content : TEXT NOT NULL</text>
+          <text x="706" y="133" font-size="11" fill="#0f172a">     feedback : TEXT NOT NULL</text>
+          <text x="706" y="154" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#b45309">CK</tspan>  duration_minutes : INT (&gt; 0)</text>
+          <text x="706" y="175" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#b45309">CK</tspan>  fee : DECIMAL(12,2) (&gt;= 0)</text>
         </g>
 
         <!-- TABLE 6: payments -->
         <g filter="url(#shadow)">
-          <rect x="680" y="230" width="218" height="145" rx="6" fill="#ffffff" stroke="#b45309" stroke-width="1.8"/>
-          <rect x="680" y="230" width="218" height="28" rx="6" fill="#b45309"/>
-          <text x="789" y="249" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="13">6. payments (1-N)</text>
-          <text x="690" y="276" font-size="11.5" fill="#0f172a"><tspan font-weight="bold" fill="#b91c1c">PK</tspan>  payment_id : INT</text>
-          <text x="690" y="296" font-size="11.5" fill="#0f172a"><tspan font-weight="bold" fill="#7c3aed">FK</tspan>  lesson_id : INT</text>
-          <text x="690" y="316" font-size="11.5" fill="#0f172a"><tspan font-weight="bold" fill="#b45309">CK</tspan>  amount DECIMAL &gt; 0</text>
-          <text x="690" y="336" font-size="11.5" fill="#0f172a">     payment_date : DATE</text>
-          <text x="690" y="356" font-size="11.5" fill="#0f172a">     method : ENUM(3 giá trị)</text>
+          <rect x="695" y="225" width="245" height="150" rx="6" fill="#ffffff" stroke="#b45309" stroke-width="1.8"/>
+          <rect x="695" y="225" width="245" height="28" rx="6" fill="#b45309"/>
+          <text x="817" y="244" text-anchor="middle" fill="#ffffff" font-weight="bold" font-size="12.5">6. payments (Quan hệ 1-N)</text>
+          <text x="706" y="272" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#b91c1c">PK</tspan>  payment_id : INT</text>
+          <text x="706" y="293" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#7c3aed">FK</tspan>  lesson_id : INT NOT NULL</text>
+          <text x="706" y="314" font-size="11" fill="#0f172a"><tspan font-weight="bold" fill="#b45309">CK</tspan>  amount : DECIMAL(12,2) (&gt; 0)</text>
+          <text x="706" y="335" font-size="11" fill="#0f172a">     payment_date : DATE NOT NULL</text>
+          <text x="706" y="356" font-size="11" fill="#0f172a">     method : ENUM('Cash','BankTransfer','Card')</text>
         </g>
 
         <!-- Legend at bottom -->
-        <rect x="25" y="384" width="873" height="24" rx="4" fill="#e2e8f0"/>
-        <text x="460" y="400" text-anchor="middle" font-size="11" fill="#1e293b" font-weight="600">
+        <rect x="20" y="392" width="920" height="24" rx="4" fill="#e2e8f0"/>
+        <text x="480" y="408" text-anchor="middle" font-size="10.8" fill="#1e293b" font-weight="600">
           Chú giải: [PK] Khóa chính (Primary Key)   |   [FK] Khóa ngoại (Foreign Key)   |   [UQ] Duy nhất (UNIQUE)   |   [CK] Ràng buộc miền giá trị (CHECK Constraint)
         </text>
       </svg>
@@ -323,9 +329,6 @@ def generate_html_report():
 
         # Đọc nội dung 4 file SQL
         schema_code = (BASE_DIR / "schema.sql").read_text(encoding="utf-8")
-        seed_code = (BASE_DIR / "seed.sql").read_text(encoding="utf-8")
-        queries_code = (BASE_DIR / "queries.sql").read_text(encoding="utf-8")
-        views_code = (BASE_DIR / "views.sql").read_text(encoding="utf-8")
 
         # Trích xuất các bảng dữ liệu đã nạp trong seed.sql
         tbl_subjects = render_table(
@@ -335,7 +338,7 @@ def generate_html_report():
         )
         tbl_tutors = render_table(
             *run_query("SELECT * FROM tutors ORDER BY tutor_id;"),
-            caption="Bảng 3.2: Dữ liệu bảng danh sách gia sư (tutors — 7 bản ghi).",
+            caption="Bảng 3.2: Dữ liệu bảng danh sách gia sư (tutors — 6 bản ghi).",
             compact=True,
         )
         tbl_students = render_table(
@@ -423,7 +426,7 @@ def generate_html_report():
                     "(theo <code>student_id</code>) và bảng <code>tutors</code> (theo <code>tutor_id</code>). "
                     "Áp dụng bộ lọc <code>l.status = 'Completed'</code> kết hợp miền thời gian nửa mở "
                     "<code>l.lesson_date &gt;= '2025-01-01' AND l.lesson_date &lt; '2025-02-01'</code> (giúp tận dụng chỉ mục B-Tree và an toàn tuyệt đối cho cả kiểu <code>DATE</code> lẫn <code>DATETIME</code>). "
-                    "Buổi học số 22 (ngày <code>2025-01-29</code>) có trạng thái <code>Cancelled</code> nên bị loại bỏ chính xác."
+                    "Buổi học số 22 (ngày <code>2025-01-29</code> của học viên Bùi Đức Thịnh) có trạng thái <code>Cancelled</code> nên bị loại bỏ chính xác."
                 ),
                 "sql": """SELECT
     l.lesson_id,
@@ -449,7 +452,7 @@ ORDER BY l.lesson_date ASC, l.lesson_id ASC;""",
                     "Xuất phát từ bảng gốc <code>subjects</code> và dùng <code>LEFT JOIN</code> sang <code>tutors</code> rồi tới <code>lessons</code>. "
                     "<strong>Kỹ thuật trọng tâm:</strong> Điều kiện lọc thời gian Quý I/2025 (<code>l.lesson_date &gt;= '2025-01-01' AND l.lesson_date &lt; '2025-04-01'</code>) "
                     "bắt buộc phải đặt ngay trong mệnh đề <code>ON</code> của phép <code>LEFT JOIN lessons</code> thay vì đặt ở <code>WHERE</code>. "
-                    "Nếu đặt ở <code>WHERE</code>, các môn học không có giao dịch trong Quý I/2025 (như <em>Kinh tế vi mô</em> chỉ có buổi học năm 2024 và <em>Hóa học đại cương</em> chưa có buổi học nào) sẽ bị biến thành <code>INNER JOIN</code> và biến mất khỏi kết quả. "
+                    "Nếu đặt ở <code>WHERE</code>, các môn học không có giao dịch trong Quý I/2025 (như <em>Kinh tế vĩ mô 1</em> chỉ có buổi học năm 2024 và <em>Pháp luật đại cương</em> chưa có buổi học nào) sẽ bị biến thành <code>INNER JOIN</code> và biến mất khỏi kết quả. "
                     "Hàm <code>COUNT(l.lesson_id)</code> chỉ đếm các dòng khác <code>NULL</code> nên trả về đúng <code>0</code> cho 2 môn học này."
                 ),
                 "sql": """SELECT
@@ -471,8 +474,8 @@ ORDER BY total_lessons_q1_2025 DESC, sub.subject_id ASC;""",
                 "analysis": (
                     "Thực hiện <code>JOIN</code> từ <code>students</code> sang <code>lessons</code> và <code>LEFT JOIN</code> sang <code>lesson_reports</code>. "
                     "Buổi học chưa có báo cáo được xác định bởi điều kiện <code>lr.report_id IS NULL</code> (anti-join pattern), đồng thời loại trừ các buổi đã hủy bằng <code>l.status &lt;&gt; 'Cancelled'</code>. "
-                    "Do một học viên có thể có nhiều buổi học đang chờ báo cáo (ví dụ học viên <code>student_id = 8</code> Vũ Hoàng Nam có 2 buổi <code>Pending</code> là buổi 19 và 20), "
-                    "ta sử dụng từ khóa <code>SELECT DISTINCT</code> để đảm bảo mỗi học viên chỉ xuất hiện duy nhất một lần. Học viên số 5 (Lê Thị Hồng Nhung) chỉ có buổi chưa báo cáo thuộc trạng thái <code>Cancelled</code> nên được loại trừ chính xác."
+                    "Do một học viên có thể có nhiều buổi học đang chờ báo cáo (ví dụ học viên <code>student_id = 8</code> Bùi Đức Thịnh có 2 buổi <code>Pending</code> là buổi 19 và 20), "
+                    "ta sử dụng từ khóa <code>SELECT DISTINCT</code> để đảm bảo mỗi học viên chỉ xuất hiện duy nhất một lần. Học viên số 5 (Hoàng Mai Linh) chỉ có buổi chưa báo cáo thuộc trạng thái <code>Cancelled</code> nên được loại trừ chính xác."
                 ),
                 "sql": """SELECT DISTINCT
     s.student_id,
@@ -490,8 +493,8 @@ ORDER BY s.student_id ASC;""",
                 "req": "Tính học phí trung bình trên một giao dịch <code>Completed</code> của từng môn học, xét toàn bộ thời gian; chỉ lấy nhóm đã phát sinh chi phí.",
                 "analysis": (
                     "Sử dụng <code>INNER JOIN</code> xuyên suốt từ <code>subjects → tutors → lessons → lesson_reports</code> với điều kiện <code>l.status = 'Completed'</code>. "
-                    "Vì đề bài yêu cầu <em>chỉ lấy nhóm đã phát sinh chi phí</em>, phép <code>INNER JOIN</code> tự động loại bỏ môn <em>Hóa học đại cương</em> (chưa có buổi học hoàn thành). "
-                    "<strong>Chống cộng lặp chi phí:</strong> Tuyệt đối không nối bảng <code>payments</code> trong câu truy vấn này vì nếu một buổi học trả góp 2 lần (như <code>lesson_id = 1</code> và <code>lesson_id = 6</code> của môn Toán), "
+                    "Vì đề bài yêu cầu <em>chỉ lấy nhóm đã phát sinh chi phí</em>, phép <code>INNER JOIN</code> tự động loại bỏ môn <em>Pháp luật đại cương</em> (chưa có buổi học hoàn thành). "
+                    "<strong>Chống cộng lặp chi phí:</strong> Tuyệt đối không nối bảng <code>payments</code> trong câu truy vấn này vì nếu một buổi học trả góp 2 lần (như <code>lesson_id = 1</code> và <code>lesson_id = 6</code> của môn <em>Phân tích dữ liệu với Python</em>), "
                     "phép nối với <code>payments</code> sẽ nhân đôi bản ghi học phí của buổi đó và làm sai lệch giá trị trung bình <code>AVG(lr.fee)</code>."
                 ),
                 "sql": """SELECT
@@ -515,7 +518,7 @@ ORDER BY avg_completed_fee DESC, sub.subject_id ASC;""",
                     "Dùng <code>INNER JOIN</code> giữa <code>tutors</code> và <code>lessons</code> kèm điều kiện <code>l.status = 'Completed'</code> và năm 2025 (<code>l.lesson_date &gt;= '2025-01-01' AND l.lesson_date &lt; '2026-01-01'</code>) "
                     "để chỉ lấy các gia sư thực sự có giao dịch hoàn thành trong năm 2025. "
                     "Gom nhóm theo <code>t.tutor_id, t.full_name</code> và sắp xếp theo <code>ORDER BY completed_lessons_2025 DESC, t.tutor_id ASC LIMIT 3</code>. "
-                    "Trên bộ dữ liệu thực tế, gia sư số 1 (TS. Nguyễn Minh Hoàng) và gia sư số 2 (ThS. Trần Thu Hà) cùng có 4 buổi <code>Completed</code>, hệ thống tự động ưu tiên xếp <code>tutor_id = 1</code> đứng trước."
+                    "Trên bộ dữ liệu thực tế, gia sư số 1 (TS. Trần Hùng) và gia sư số 2 (TS. Vũ Đức Minh) cùng có 4 buổi <code>Completed</code>, hệ thống tự động ưu tiên xếp <code>tutor_id = 1</code> đứng trước."
                 ),
                 "sql": """SELECT
     t.tutor_id,
@@ -537,7 +540,7 @@ LIMIT 3;""",
                 "analysis": (
                     "Bắt đầu từ bảng <code>students</code>, thực hiện <code>LEFT JOIN lessons</code> và <code>LEFT JOIN payments</code>. "
                     "Điều kiện lọc ngày thanh toán trong năm 2025 (<code>p.payment_date &gt;= '2025-01-01' AND p.payment_date &lt; '2026-01-01'</code>) được đặt ngay tại mệnh đề <code>ON</code> của phép <code>LEFT JOIN payments</code>. "
-                    "Nhờ đó, cả những học viên chỉ thanh toán trong năm 2024 (học viên 6 Trần Minh Đức, học viên 9 Ngô Phương Thảo), học viên nợ 100% (học viên 7 Đỗ Thùy Linh) và học viên chưa từng học (học viên 10, 11) đều được giữ lại đầy đủ và hiển thị <code>0.00</code> thông qua hàm <code>COALESCE(SUM(p.amount), 0.00)</code>."
+                    "Nhờ đó, cả những học viên chỉ thanh toán trong năm 2024 (học viên 6 Đặng Tuấn Kiệt, học viên 9 Đỗ Khánh Huyền), học viên nợ 100% (học viên 7 Vũ Ngọc Hà) và học viên chưa từng học (học viên 10 Ngô Hải Đăng, học viên 11 Lý Thanh Trúc) đều được giữ lại đầy đủ và hiển thị <code>0.00</code> thông qua hàm <code>COALESCE(SUM(p.amount), 0.00)</code>."
                 ),
                 "sql": """SELECT
     s.student_id,
@@ -558,8 +561,8 @@ ORDER BY total_paid_2025 DESC, s.student_id ASC;""",
                 "analysis": (
                     "Thực hiện <code>LEFT JOIN</code> từ <code>students</code> sang <code>lessons</code> và <code>payments</code> trên toàn bộ thời gian. "
                     "Gom nhóm theo từng học viên và lọc bằng <code>HAVING COUNT(p.payment_id) = 0</code>. "
-                    "Kết quả trả về đầy đủ 2 nhóm đối tượng: (1) Học viên đã có lịch sử buổi học nhưng chưa trả tiền lần nào (Đỗ Thùy Linh <code>student_id = 7</code>, Vũ Hoàng Nam <code>student_id = 8</code>) "
-                    "và (2) Học viên mới đăng ký chưa từng phát sinh buổi học (Bùi Quốc Khánh <code>student_id = 10</code>, Đinh Mai Phương <code>student_id = 11</code>)."
+                    "Kết quả trả về đầy đủ 2 nhóm đối tượng: (1) Học viên đã có lịch sử buổi học nhưng chưa trả tiền lần nào (Vũ Ngọc Hà <code>student_id = 7</code>, Bùi Đức Thịnh <code>student_id = 8</code>) "
+                    "và (2) Học viên mới đăng ký chưa từng phát sinh buổi học (Ngô Hải Đăng <code>student_id = 10</code>, Lý Thanh Trúc <code>student_id = 11</code>)."
                 ),
                 "sql": """SELECT
     s.student_id,
@@ -580,7 +583,7 @@ ORDER BY s.student_id ASC;""",
                 "analysis": (
                     "<strong>Chống cộng lặp chi phí:</strong> Học phí đã xác nhận nằm ở bảng <code>lesson_reports</code> (quan hệ 1-1 chặt chẽ với <code>lessons</code> nhờ ràng buộc <code>lesson_id UNIQUE</code>). "
                     "Do đó, ta chỉ thực hiện <code>LEFT JOIN</code> từ <code>students</code> sang <code>lessons</code> (lọc <code>l.status = 'Completed'</code>) và <code>lesson_reports</code> mà tuyệt đối không nối bảng <code>payments</code>. "
-                    "Nếu nối thêm <code>payments</code>, học viên Phạm Ngọc Danh (<code>student_id = 1</code>, có buổi học số 1 trả 2 lần) sẽ bị cộng lặp thêm 500,000 VNĐ. "
+                    "Nếu nối thêm <code>payments</code>, học viên Lê Hoàng Minh Khôi (<code>student_id = 1</code>, có buổi học số 1 trả 2 lần) sẽ bị cộng lặp thêm 500,000 VNĐ. "
                     "Các học viên có cùng mức học phí (ví dụ học viên 6 và 9 cùng đạt <code>400000.00</code>; học viên 8, 10, 11 cùng đạt <code>0.00</code>) được sắp xếp chính xác theo <code>student_id ASC</code>."
                 ),
                 "sql": """SELECT
@@ -599,9 +602,9 @@ ORDER BY total_confirmed_fee DESC, s.student_id ASC;""",
                 "title": "Tính tỷ lệ hủy buổi học của từng gia sư trong năm 2025",
                 "req": "Tính tỷ lệ hủy của từng gia sư trong năm 2025: <code>(số buổi học Cancelled / tổng số buổi học của năm) * 100</code>. Làm tròn 2 chữ số thập phân; trả <code>NULL</code> nếu tổng bằng <code>0</code>.",
                 "analysis": (
-                    "Sử dụng <code>LEFT JOIN</code> từ <code>tutors</code> sang <code>lessons</code> với điều kiện năm 2025 đặt trong <code>ON</code> để giữ lại cả những gia sư không có buổi dạy nào trong năm 2025 (gia sư 6 và 7). "
+                    "Sử dụng <code>LEFT JOIN</code> từ <code>tutors</code> sang <code>lessons</code> với điều kiện năm 2025 đặt trong <code>ON</code> để giữ lại cả gia sư không có buổi dạy nào trong năm 2025 (gia sư số 6 ThS. Phạm Đức Chung chỉ dạy trong năm 2024). "
                     "Đếm số buổi hủy bằng biểu thức điều kiện <code>SUM(CASE WHEN l.status = 'Cancelled' THEN 1 ELSE 0 END)</code>. "
-                    "Để xử lý chia cho 0 một cách thanh lịch và trả về <code>NULL</code> đúng yêu cầu khi tổng số buổi học trong năm bằng 0, ta dùng hàm <code>NULLIF(COUNT(l.lesson_id), 0)</code> ở mẫu số, sau đó bọc ngoài bằng <code>ROUND(..., 2)</code>."
+                    "Để xử lý chia cho 0 một cách an toàn và trả về <code>NULL</code> đúng yêu cầu khi tổng số buổi học trong năm bằng 0, ta dùng hàm <code>NULLIF(COUNT(l.lesson_id), 0)</code> ở mẫu số, sau đó bọc ngoài bằng <code>ROUND(..., 2)</code>."
                 ),
                 "sql": """SELECT
     t.tutor_id,
@@ -627,7 +630,7 @@ ORDER BY t.tutor_id ASC;""",
                 "analysis": (
                     "Thực hiện <code>INNER JOIN</code> giữa <code>students</code> và <code>lessons</code>, lọc trạng thái <code>l.status = 'Completed'</code> và thời gian trong năm 2025 tại mệnh đề <code>WHERE</code>. "
                     "Gom nhóm theo từng học viên (<code>GROUP BY s.student_id, s.full_name</code>) và áp dụng điều kiện lọc sau gom nhóm <code>HAVING COUNT(l.lesson_id) &gt; 3</code> (tức từ 4 buổi trở lên). "
-                    "Kết quả trích xuất chính xác 2 học viên tiêu biểu: Phạm Ngọc Danh (5 buổi) và Nguyễn Trịnh Anh Tuấn (4 buổi)."
+                    "Kết quả trích xuất chính xác 2 học viên tiêu biểu: Lê Hoàng Minh Khôi (5 buổi) và Nguyễn Phương Anh (4 buổi)."
                 ),
                 "sql": """SELECT
     s.student_id,
@@ -737,7 +740,7 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
   .cover-inner-border {{
     border: 1px solid #93c5fd;
     height: 100%;
-    padding: 8mm 10mm;
+    padding: 10mm 12mm;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -745,60 +748,69 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
   .cover-top {{
     text-align: center;
   }}
+  .cover-top p {{
+    text-align: center !important;
+  }}
   .quoc-hieu {{
-    font-size: 10pt;
+    font-size: 10.5pt;
     font-weight: 700;
     color: #334155;
     letter-spacing: 0.6px;
     text-transform: uppercase;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
+    text-align: center;
   }}
   .tieu-ngu {{
-    font-size: 10pt;
+    font-size: 10.2pt;
     font-weight: 600;
     color: #475569;
     margin-bottom: 10px;
+    text-align: center;
   }}
   .divider-short {{
-    width: 120px;
+    width: 140px;
     height: 1.5px;
     background: #475569;
-    margin: 0 auto 14px auto;
+    margin: 0 auto 16px auto;
   }}
   .uni-name {{
-    font-size: 13pt;
+    font-size: 13.5pt;
     font-weight: 800;
     color: #1e3a8a;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
     margin: 0;
+    text-align: center;
   }}
   .uni-name-en {{
     font-size: 9.5pt;
     font-weight: 600;
     color: #2563eb;
     letter-spacing: 1px;
-    margin: 2px 0 8px 0;
+    margin: 3px 0 10px 0;
+    text-align: center;
   }}
   .faculty-name {{
-    font-size: 11.5pt;
+    font-size: 12pt;
     font-weight: 800;
     color: #0f172a;
     margin: 0;
+    text-align: center;
   }}
   .faculty-name-en {{
     font-size: 9pt;
     font-weight: 600;
     color: #0284c7;
     letter-spacing: 0.8px;
-    margin: 2px 0 0 0;
+    margin: 3px 0 0 0;
+    text-align: center;
   }}
 
   .logo-row {{
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 42px;
-    margin: 16px 0 12px 0;
+    gap: 48px;
+    margin: 18px 0 10px 0;
   }}
   .logo-box {{
     display: flex;
@@ -806,27 +818,27 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
     align-items: center;
   }}
   .logo-box img {{
-    width: 96px;
-    height: 96px;
+    width: 100px;
+    height: 100px;
     object-fit: contain;
     filter: drop-shadow(0 3px 6px rgba(15, 23, 42, 0.12));
   }}
   .logo-caption {{
-    font-size: 8pt;
+    font-size: 8.2pt;
     font-weight: 700;
     color: #475569;
-    margin-top: 5px;
+    margin-top: 6px;
     letter-spacing: 0.5px;
   }}
 
   .cover-title-block {{
     text-align: center;
-    padding: 14px 12px;
+    padding: 16px 14px;
     background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
     border-top: 2.5px solid #1e3a8a;
     border-bottom: 2.5px solid #1e3a8a;
     border-radius: 8px;
-    margin: 6px 0;
+    margin: 8px 0;
   }}
   .report-type {{
     font-size: 13pt;
@@ -840,7 +852,7 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
     font-weight: 900;
     color: #0f172a;
     line-height: 1.28;
-    margin: 0 0 8px 0;
+    margin: 0 0 10px 0;
     text-transform: uppercase;
   }}
   .report-db-badge {{
@@ -850,7 +862,7 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
     font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
     font-size: 10.5pt;
     font-weight: 700;
-    padding: 4px 16px;
+    padding: 4px 18px;
     border-radius: 20px;
   }}
 
@@ -860,12 +872,12 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
   .meta-info-grid {{
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 8px 16px;
+    gap: 8px 18px;
     background: #f8fafc;
     border: 1px solid #cbd5e1;
     border-radius: 6px;
-    padding: 9px 14px;
-    margin-bottom: 10px;
+    padding: 10px 16px;
+    margin-bottom: 14px;
     font-size: 9.8pt;
   }}
   .meta-member-title {{
@@ -873,23 +885,24 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
     font-weight: 800;
     color: #1e3a8a;
     text-transform: uppercase;
-    margin: 0 0 6px 0;
+    margin: 0 0 8px 0;
     letter-spacing: 0.4px;
+    text-align: center;
   }}
   .member-table {{
     width: 100%;
     border-collapse: collapse;
-    font-size: 9.2pt;
+    font-size: 9.5pt;
   }}
   .member-table th {{
     background: #1e3a8a;
     color: #ffffff;
-    padding: 6px 8px;
+    padding: 7px 10px;
     text-align: left;
     font-weight: 700;
   }}
   .member-table td {{
-    padding: 5.5px 8px;
+    padding: 7px 10px;
     border-bottom: 1px solid #cbd5e1;
     color: #1e293b;
   }}
@@ -898,10 +911,10 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
   }}
   .cover-footer {{
     text-align: center;
-    font-size: 9.5pt;
+    font-size: 10pt;
     font-weight: 700;
     color: #334155;
-    padding-top: 6px;
+    padding-top: 8px;
     border-top: 1px solid #cbd5e1;
   }}
 
@@ -917,7 +930,6 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
     margin: 18px 0 12px 0;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     page-break-after: avoid;
   }}
   .section-banner h1 {{
@@ -926,13 +938,6 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
     margin: 0;
     text-transform: uppercase;
     letter-spacing: 0.4px;
-  }}
-  .section-banner span {{
-    font-size: 9pt;
-    font-weight: 600;
-    background: rgba(255,255,255,0.18);
-    padding: 2px 10px;
-    border-radius: 12px;
   }}
   h2 {{
     font-size: 11.5pt;
@@ -1202,51 +1207,40 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
 
     <div class="cover-meta">
       <div class="meta-info-grid">
-        <div><strong>Học phần:</strong> Cơ sở dữ liệu (Database Systems)</div>
+        <div><strong>Học phần:</strong> Nhập môn Cơ sở dữ liệu</div>
         <div><strong>Hệ Quản trị CSDL:</strong> MySQL (InnoDB, UTF8MB4)</div>
         <div><strong>Đơn vị đào tạo:</strong> Khoa KHDL &amp; TTNT (FDA - NEU)</div>
         <div><strong>Ngày hoàn thành:</strong> Tháng 11 / 2026</div>
       </div>
 
-      <div class="meta-member-title">Danh sách Thành viên Thực hiện &amp; Phân công Nhiệm vụ</div>
+      <div class="meta-member-title">DANH SÁCH THÀNH VIÊN NHÓM THỰC HIỆN</div>
       <table class="member-table">
         <thead>
           <tr>
-            <th style="width: 7%;">STT</th>
-            <th style="width: 30%;">Họ và Tên Sinh viên</th>
-            <th style="width: 16%;">Mã Sinh viên</th>
-            <th style="width: 16%;">Lớp chuyên ngành</th>
-            <th style="width: 31%;">Phân công Nhiệm vụ</th>
+            <th style="width: 8%; text-align: center;">STT</th>
+            <th style="width: 32%;">Họ và Tên Sinh viên</th>
+            <th style="width: 18%; text-align: center;">Mã Sinh viên</th>
+            <th style="width: 42%;">Phân công Nhiệm vụ</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td class="center-cell"><strong>1</strong></td>
             <td><strong>Phạm Ngọc Danh</strong></td>
-            <td><strong>11251809</strong></td>
-            <td>KHDL &amp; TTNT (FDA)</td>
-            <td>Thiết kế lược đồ <code>schema.sql</code>, tối ưu VIEW <code>views.sql</code> &amp; Tổng hợp Báo cáo</td>
+            <td class="center-cell"><strong>11251809</strong></td>
+            <td>Thiết kế lược đồ <code>schema.sql</code>, xây dựng VIEW <code>views.sql</code> &amp; Tổng hợp Báo cáo</td>
           </tr>
           <tr>
-            <td class="center-cell">2</td>
-            <td>Nguyễn Trịnh Anh Tuấn</td>
-            <td>11258690</td>
-            <td>KHDL &amp; TTNT (FDA)</td>
-            <td>Xây dựng dữ liệu mẫu <code>seed.sql</code> &amp; Kiểm chứng ràng buộc toàn vẹn</td>
+            <td class="center-cell"><strong>2</strong></td>
+            <td><strong>Nguyễn Mạnh Dũng</strong></td>
+            <td class="center-cell"><strong>11252140</strong></td>
+            <td>Xây dựng dữ liệu mẫu <code>seed.sql</code>, kiểm chứng ràng buộc &amp; Nhóm truy vấn 1 – 5</td>
           </tr>
           <tr>
-            <td class="center-cell">3</td>
-            <td>Cao Đình Bình</td>
-            <td>11251272</td>
-            <td>KHDL &amp; TTNT (FDA)</td>
-            <td>Phát triển &amp; kiểm thử nhóm Truy vấn 1 – 5 trong <code>queries.sql</code></td>
-          </tr>
-          <tr>
-            <td class="center-cell">4</td>
-            <td>Hoàng Anh Tú</td>
-            <td>11258581</td>
-            <td>KHDL &amp; TTNT (FDA)</td>
-            <td>Phát triển &amp; kiểm thử nhóm Truy vấn 6 – 10 và đóng gói GitHub</td>
+            <td class="center-cell"><strong>3</strong></td>
+            <td><strong>Hoàng Đức Dương</strong></td>
+            <td class="center-cell"><strong>11252228</strong></td>
+            <td>Phát triển &amp; kiểm thử Nhóm truy vấn 6 – 10 trong <code>queries.sql</code> &amp; Đóng gói GitHub</td>
           </tr>
         </tbody>
       </table>
@@ -1263,7 +1257,6 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
 <!-- ===================================================================== -->
 <div class="section-banner">
   <h1>Mục 1. Tổng Quan &amp; Phân Tích Bài Toán Nghiệp Vụ</h1>
-  <span>Tổng quan Hệ thống</span>
 </div>
 
 <h2>1.1. Mục tiêu và Bối cảnh Nghiệp vụ</h2>
@@ -1288,7 +1281,6 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
 <!-- ===================================================================== -->
 <div class="section-banner">
   <h1>Mục 2. Thiết Kế Cơ Sở Dữ Liệu (Phần A — schema.sql)</h1>
-  <span>Thiết kế Lược đồ &amp; ERD</span>
 </div>
 
 <h2>2.1. Sơ đồ Quan hệ Thực thể (Entity-Relationship Diagram — ERD)</h2>
@@ -1362,12 +1354,11 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
 <!-- ===================================================================== -->
 <div class="section-banner section-page-break">
   <h1>Mục 3. Nạp Dữ Liệu Mẫu &amp; Kiểm Chứng (Phần B — seed.sql)</h1>
-  <span>Dữ liệu Mẫu &amp; Edge-Cases</span>
 </div>
 
 <h2>3.1. Ma trận Thiết kế Kịch bản Dữ liệu Mẫu Bao phủ Toàn bộ Edge-Cases</h2>
 <p>
-  Bộ dữ liệu mẫu trong <code>seed.sql</code> được thiết kế vượt mức tối thiểu của đề bài và bao phủ chính xác tất cả 11 kịch bản biên (edge-cases) để kiểm thử toàn diện 10 câu truy vấn và 3 VIEW:
+  Bộ dữ liệu mẫu trong <code>seed.sql</code> được thiết kế vượt mức tối thiểu của đề bài và bao phủ chính xác tất cả 10 nhóm kịch bản biên (edge-cases) để kiểm thử toàn diện 10 câu truy vấn và 3 VIEW:
 </p>
 
 <div class="table-wrap">
@@ -1384,8 +1375,8 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
       <tr>
         <td class="center-cell">1</td>
         <td>Số lượng bản ghi tối thiểu mỗi bảng</td>
-        <td>6 / 7 / 11 / 23 / 16 / 17</td>
-        <td><code>subjects</code>=6 (≥5), <code>tutors</code>=7 (≥6), <code>students</code>=11 (≥10), <code>lessons</code>=23 (≥12), <code>lesson_reports</code>=16 (≥10), <code>payments</code>=17 (≥10).</td>
+        <td>6 / 6 / 11 / 23 / 16 / 17</td>
+        <td><code>subjects</code>=6 (≥5), <code>tutors</code>=6 (≥6), <code>students</code>=11 (≥10), <code>lessons</code>=23 (≥12), <code>lesson_reports</code>=16 (≥10), <code>payments</code>=17 (≥10).</td>
       </tr>
       <tr>
         <td class="center-cell">2</td>
@@ -1403,19 +1394,19 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
         <td class="center-cell">4</td>
         <td>Ít nhất 1 học viên có <strong>hơn 3 buổi học Completed</strong> trong năm 2025 (≥ 4 buổi)</td>
         <td>2 học viên đạt điều kiện</td>
-        <td>• <code>student_id = 1</code> (Phạm Ngọc Danh): <strong>5 buổi</strong> Completed năm 2025 (buổi 1, 2, 3, 4, 5)<br>• <code>student_id = 2</code> (Nguyễn Trịnh Anh Tuấn): <strong>4 buổi</strong> Completed năm 2025 (buổi 6, 7, 8, 9).</td>
+        <td>• <code>student_id = 1</code> (Lê Hoàng Minh Khôi): <strong>5 buổi</strong> Completed năm 2025 (buổi 1, 2, 3, 4, 5)<br>• <code>student_id = 2</code> (Nguyễn Phương Anh): <strong>4 buổi</strong> Completed năm 2025 (buổi 6, 7, 8, 9).</td>
       </tr>
       <tr>
         <td class="center-cell">5</td>
         <td>Ít nhất 1 học viên có lịch sử giao dịch nhưng chưa thanh toán lần nào</td>
         <td>2 học viên</td>
-        <td>• <code>student_id = 7</code> (Đỗ Thùy Linh): Có buổi 15 (<code>Completed</code>, phí 450,000) và buổi 18 (<code>Pending</code>) nhưng 0 bản ghi <code>payments</code>.<br>• <code>student_id = 8</code> (Vũ Hoàng Nam): Có buổi 19, 20 (<code>Pending</code>) và 22 (<code>Cancelled</code>), 0 thanh toán.</td>
+        <td>• <code>student_id = 7</code> (Vũ Ngọc Hà): Có buổi 15 (<code>Completed</code>, phí 450,000) và buổi 18 (<code>Pending</code>) nhưng 0 bản ghi <code>payments</code>.<br>• <code>student_id = 8</code> (Bùi Đức Thịnh): Có buổi 19, 20 (<code>Pending</code>) và 22 (<code>Cancelled</code>), 0 thanh toán.</td>
       </tr>
       <tr>
         <td class="center-cell">6</td>
         <td>Ít nhất 1 học viên chưa từng có buổi học nào</td>
         <td>2 học viên</td>
-        <td><code>student_id = 10</code> (Bùi Quốc Khánh) và <code>student_id = 11</code> (Đinh Mai Phương) — chưa từng có dòng nào trong <code>lessons</code>.</td>
+        <td><code>student_id = 10</code> (Ngô Hải Đăng) và <code>student_id = 11</code> (Lý Thanh Trúc) — chưa từng có dòng nào trong <code>lessons</code>.</td>
       </tr>
       <tr>
         <td class="center-cell">7</td>
@@ -1433,13 +1424,13 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
         <td class="center-cell">9</td>
         <td>Ít nhất 1 môn học chưa có giao dịch trong Quý I/2025</td>
         <td>2 môn học</td>
-        <td>• <code>subject_id = 5</code> (Kinh tế vi mô): chỉ có 2 buổi học trong năm 2024.<br>• <code>subject_id = 6</code> (Hóa học đại cương): chưa có buổi học nào toàn thời gian.</td>
+        <td>• <code>subject_id = 5</code> (Kinh tế vĩ mô 1): chỉ có 2 buổi học trong năm 2024.<br>• <code>subject_id = 6</code> (Pháp luật đại cương): chưa có buổi học nào toàn thời gian.</td>
       </tr>
       <tr>
         <td class="center-cell">10</td>
         <td>Ít nhất 1 gia sư chưa có giao dịch trong năm 2025</td>
-        <td>2 gia sư</td>
-        <td>• <code>tutor_id = 6</code> (TS. Đặng Văn Khoa): chỉ dạy trong năm 2024.<br>• <code>tutor_id = 7</code> (ThS. Bùi Thanh Tùng): chưa có buổi dạy nào.</td>
+        <td>1 gia sư</td>
+        <td>• <code>tutor_id = 6</code> (ThS. Phạm Đức Chung): chỉ dạy 2 buổi trong năm 2024, chưa có giao dịch năm 2025.</td>
       </tr>
     </tbody>
   </table>
@@ -1468,7 +1459,7 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
   <div class="callout-title">4 Kịch bản Kiểm thử Âm tính (Negative Test Cases) được Đặt trong Chú thích Cuối Tệp seed.sql</div>
   <ul style="margin-bottom:0;">
     <li><strong>Vi phạm Khóa ngoại (<code>FOREIGN KEY</code>):</strong> <code>INSERT INTO lessons ... VALUES (999, 1, '2025-04-01', 'Pending');</code> — Bị chặn bởi <code>fk_lessons_student</code> (Lỗi MySQL <code>ERROR 1452: Cannot add or update a child row</code>) do <code>student_id = 999</code> không tồn tại.</li>
-    <li><strong>Vi phạm Ràng buộc <code>duration_minutes &lt;= 0</code>:</strong> <code>INSERT INTO lesson_reports ... VALUES (17, 'Ôn tập Vật lý', 'Tốt', 0, 450000.00);</code> — Bị chặn bởi <code>chk_report_duration</code> (Lỗi MySQL <code>ERROR 3819: Check constraint is violated</code>).</li>
+    <li><strong>Vi phạm Ràng buộc <code>duration_minutes &lt;= 0</code>:</strong> <code>INSERT INTO lesson_reports ... VALUES (17, 'Ôn tập Phân tích dữ liệu với Python', 'Tốt', 0, 450000.00);</code> — Bị chặn bởi <code>chk_report_duration</code> (Lỗi MySQL <code>ERROR 3819: Check constraint is violated</code>).</li>
     <li><strong>Vi phạm Ràng buộc <code>amount &lt;= 0</code>:</strong> <code>INSERT INTO payments ... VALUES (1, -50000.00, '2025-01-15', 'Cash');</code> — Bị chặn bởi <code>chk_payment_amount</code> (Lỗi MySQL <code>ERROR 3819</code>).</li>
     <li><strong>Vi phạm Ràng buộc Trùng <code>lesson_id</code> (<code>UNIQUE</code>):</strong> <code>INSERT INTO lesson_reports (lesson_id, ...) VALUES (1, ...);</code> — Bị chặn bởi khóa <code>UNIQUE (lesson_id)</code> (Lỗi MySQL <code>ERROR 1062: Duplicate entry '1'</code>).</li>
   </ul>
@@ -1479,7 +1470,6 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
 <!-- ===================================================================== -->
 <div class="section-banner section-page-break">
   <h1>Mục 4. Giải Quyết 10 Truy Vấn Dữ Liệu (Phần C — queries.sql)</h1>
-  <span>Phân tích &amp; Kết quả Thực tế</span>
 </div>
 
 <div class="callout callout-success">
@@ -1496,7 +1486,6 @@ ORDER BY completed_lessons_2025 DESC, s.student_id ASC;""",
 <!-- ===================================================================== -->
 <div class="section-banner section-page-break">
   <h1>Mục 5. Xây Dựng Các VIEW Toàn Thời Gian (Phần D — views.sql)</h1>
-  <span>Thiết kế VIEW &amp; Kết quả</span>
 </div>
 
 <p>
@@ -1528,7 +1517,7 @@ LEFT JOIN lesson_reports lr ON l.lesson_id = lr.lesson_id;</code></pre>
 
 <h2>5.2. Thiết kế và Kết quả Thực tế của <code>v_group_summary</code></h2>
 <p>
-  <strong>Logic thiết kế:</strong> Khung nhìn <code>v_group_summary</code> xuất phát từ bảng <code>subjects</code> và thực hiện chuỗi <code>LEFT JOIN</code> sang <code>tutors → lessons → lesson_reports</code>. Nhờ đó, môn học chưa từng phát sinh giao dịch (<em>Hóa học đại cương</em>, <code>subject_id = 6</code>) vẫn được giữ lại với các chỉ số đếm và <code>total_fee = 0.00</code>. Việc không nối bảng <code>payments</code> giúp <code>SUM(lr.fee)</code> chính xác tuyệt đối, không bị cộng lặp.
+  <strong>Logic thiết kế:</strong> Khung nhìn <code>v_group_summary</code> xuất phát từ bảng <code>subjects</code> và thực hiện chuỗi <code>LEFT JOIN</code> sang <code>tutors → lessons → lesson_reports</code>. Nhờ đó, môn học chưa từng phát sinh giao dịch (<em>Pháp luật đại cương</em>, <code>subject_id = 6</code>) vẫn được giữ lại với các chỉ số đếm và <code>total_fee = 0.00</code>. Việc không nối bảng <code>payments</code> giúp <code>SUM(lr.fee)</code> chính xác tuyệt đối, không bị cộng lặp.
 </p>
 <pre class="sql-code"><code>CREATE OR REPLACE VIEW v_group_summary AS
 SELECT
@@ -1547,7 +1536,7 @@ GROUP BY sub.subject_id, sub.name;</code></pre>
 
 <h2>5.3. Thiết kế và Kết quả Thực tế của <code>v_debt</code> (Chống Cộng Lặp Chi Phí)</h2>
 <p>
-  <strong>Logic thiết kế:</strong> Khung nhìn <code>v_debt</code> tổng hợp công nợ cho toàn bộ 11 học viên. Để <strong>bảo đảm chi phí không bị cộng lặp</strong> khi một buổi học có nhiều lần thanh toán (như <code>lesson_id = 1</code> của Phạm Ngọc Danh và <code>lesson_id = 6</code> của Nguyễn Trịnh Anh Tuấn), ta sử dụng bảng dẫn xuất (Derived Table) <code>pay_per_lesson</code> gom nhóm <code>SUM(amount)</code> theo <code>lesson_id</code> trước khi <code>LEFT JOIN</code> với <code>lessons</code> và <code>lesson_reports</code>:
+  <strong>Logic thiết kế:</strong> Khung nhìn <code>v_debt</code> tổng hợp công nợ cho toàn bộ 11 học viên. Để <strong>bảo đảm chi phí không bị cộng lặp</strong> khi một buổi học có nhiều lần thanh toán (như <code>lesson_id = 1</code> của Lê Hoàng Minh Khôi và <code>lesson_id = 6</code> của Nguyễn Phương Anh), ta sử dụng bảng dẫn xuất (Derived Table) <code>pay_per_lesson</code> gom nhóm <code>SUM(amount)</code> theo <code>lesson_id</code> trước khi <code>LEFT JOIN</code> với <code>lessons</code> và <code>lesson_reports</code>:
 </p>
 <pre class="sql-code"><code>CREATE OR REPLACE VIEW v_debt AS
 SELECT
@@ -1602,7 +1591,6 @@ GROUP BY s.student_id, s.full_name;</code></pre>
         )
         browser.close()
 
-    # Xóa file HTML tạm sau khi xuất PDF xong
     if HTML_OUTPUT.exists():
         HTML_OUTPUT.unlink()
     print(f"Đã kết xuất thành công PDF: {PDF_OUTPUT} ({PDF_OUTPUT.stat().st_size / 1024:.1f} KB)")

@@ -1,16 +1,9 @@
--- ============================================================================
--- ĐỀ 01: QUẢN LÝ TRUNG TÂM GIA SƯ (tutoring_mini)
--- Tệp 4: views.sql - Tạo các VIEW tổng hợp dữ liệu toàn thời gian
--- ============================================================================
-
 USE tutoring_mini;
 
--- ----------------------------------------------------------------------------
 -- 1. VIEW v_detail:
 -- Mỗi dòng là một buổi học, gồm mã buổi học, ngày, trạng thái, mã + tên học viên,
 -- mã + tên gia sư, mã + tên môn học và học phí.
 -- Giữ cả giao dịch chưa có kết quả (fee là NULL).
--- ----------------------------------------------------------------------------
 CREATE OR REPLACE VIEW v_detail AS
 SELECT
     l.lesson_id,
@@ -29,12 +22,10 @@ JOIN tutors t ON l.tutor_id = t.tutor_id
 JOIN subjects sub ON t.subject_id = sub.subject_id
 LEFT JOIN lesson_reports lr ON l.lesson_id = lr.lesson_id;
 
--- ----------------------------------------------------------------------------
 -- 2. VIEW v_group_summary:
 -- Mỗi dòng là một môn học, gồm mã, tên, tổng giao dịch, số Completed,
 -- số Cancelled và tổng học phí (bằng 0 nếu chưa phát sinh);
 -- giữ cả nhóm chưa phát sinh giao dịch.
--- ----------------------------------------------------------------------------
 CREATE OR REPLACE VIEW v_group_summary AS
 SELECT
     sub.subject_id,
@@ -49,14 +40,12 @@ LEFT JOIN lessons l ON t.tutor_id = l.tutor_id
 LEFT JOIN lesson_reports lr ON l.lesson_id = lr.lesson_id
 GROUP BY sub.subject_id, sub.name;
 
--- ----------------------------------------------------------------------------
 -- 3. VIEW v_debt:
 -- Mỗi dòng là một học viên, gồm mã, tên, tổng học phí đã xác nhận, tổng đã trả
 -- và còn nợ (công nợ = tổng chi phí đã xác nhận - tổng tiền thực thu).
 -- Chống cộng lặp chi phí: Gom nhóm bảng payments theo lesson_id trong subquery
 -- pay_per_lesson trước khi LEFT JOIN với lessons và lesson_reports.
 -- Giữ cả người chưa phát sinh chi phí hoặc thanh toán (hiển thị 0).
--- ----------------------------------------------------------------------------
 CREATE OR REPLACE VIEW v_debt AS
 SELECT
     s.student_id,
@@ -79,9 +68,7 @@ LEFT JOIN (
     ON l.lesson_id = pay_per_lesson.lesson_id
 GROUP BY s.student_id, s.full_name;
 
--- ----------------------------------------------------------------------------
 -- Truy vấn kiểm tra kết quả của 3 VIEW
--- ----------------------------------------------------------------------------
 SELECT * FROM v_detail ORDER BY lesson_id ASC;
 SELECT * FROM v_group_summary ORDER BY subject_id ASC;
 SELECT * FROM v_debt ORDER BY remaining_debt DESC, student_id ASC;

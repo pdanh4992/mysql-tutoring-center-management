@@ -1,8 +1,3 @@
--- ============================================================================
--- ĐỀ 01: QUẢN LÝ TRUNG TÂM GIA SƯ (tutoring_mini)
--- Tệp 1: schema.sql - Thiết kế và khởi tạo lược đồ Cơ sở dữ liệu
--- ============================================================================
-
 DROP DATABASE IF EXISTS tutoring_mini;
 CREATE DATABASE tutoring_mini
     CHARACTER SET utf8mb4
@@ -10,17 +5,13 @@ CREATE DATABASE tutoring_mini
 
 USE tutoring_mini;
 
--- ----------------------------------------------------------------------------
 -- 1. Bảng subjects: Danh mục môn học
--- ----------------------------------------------------------------------------
 CREATE TABLE subjects (
     subject_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL UNIQUE
 ) ENGINE=InnoDB;
 
--- ----------------------------------------------------------------------------
 -- 2. Bảng tutors: Danh sách gia sư
--- ----------------------------------------------------------------------------
 CREATE TABLE tutors (
     tutor_id INT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
@@ -33,9 +24,7 @@ CREATE TABLE tutors (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
--- ----------------------------------------------------------------------------
 -- 3. Bảng students: Danh sách học viên
--- ----------------------------------------------------------------------------
 CREATE TABLE students (
     student_id INT AUTO_INCREMENT PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
@@ -43,9 +32,7 @@ CREATE TABLE students (
     phone VARCHAR(20) NOT NULL
 ) ENGINE=InnoDB;
 
--- ----------------------------------------------------------------------------
 -- 4. Bảng lessons: Lịch sử và trạng thái các buổi học
--- ----------------------------------------------------------------------------
 CREATE TABLE lessons (
     lesson_id INT AUTO_INCREMENT PRIMARY KEY,
     student_id INT NOT NULL,
@@ -62,9 +49,7 @@ CREATE TABLE lessons (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
--- ----------------------------------------------------------------------------
 -- 5. Bảng lesson_reports: Báo cáo kết quả và học phí buổi học (Quan hệ 1-1 với lessons)
--- ----------------------------------------------------------------------------
 CREATE TABLE lesson_reports (
     report_id INT AUTO_INCREMENT PRIMARY KEY,
     lesson_id INT NOT NULL UNIQUE,
@@ -80,9 +65,7 @@ CREATE TABLE lesson_reports (
         ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
--- ----------------------------------------------------------------------------
 -- 6. Bảng payments: Giao dịch thanh toán học phí (Quan hệ 1-N với lessons)
--- ----------------------------------------------------------------------------
 CREATE TABLE payments (
     payment_id INT AUTO_INCREMENT PRIMARY KEY,
     lesson_id INT NOT NULL,
